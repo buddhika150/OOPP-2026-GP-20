@@ -1,0 +1,135 @@
+CREATE DATABASE IF NOT EXISTS faculty_technology_management;
+USE faculty_technology_management;
+
+CREATE TABLE User (
+ User_ID INT AUTO_INCREMENT PRIMARY KEY,
+ Username VARCHAR(50) NOT NULL UNIQUE,
+ Password VARCHAR(255) NOT NULL,
+ Role ENUM('ADMIN','LECTURER','TECHNICAL_OFFICER','STUDENT') NOT NULL,
+ Email VARCHAR(100) NOT NULL UNIQUE,
+ Profile_pic VARCHAR(255),
+ Phone VARCHAR(20),
+ Fname VARCHAR(50),
+ Lname VARCHAR(50)
+);
+
+CREATE TABLE Admin (
+ Admin_ID INT PRIMARY KEY,
+ FOREIGN KEY (Admin_ID) REFERENCES User(User_ID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Technical_Officer (
+ TO_ID INT PRIMARY KEY,
+ Department VARCHAR(100),
+ FOREIGN KEY (TO_ID) REFERENCES User(User_ID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Lecturer (
+ Lecturer_ID INT PRIMARY KEY,
+ Department VARCHAR(100),
+ FOREIGN KEY (Lecturer_ID) REFERENCES User(User_ID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Student (
+ Student_ID INT PRIMARY KEY,
+ TG_num VARCHAR(30) NOT NULL UNIQUE,
+ Batch VARCHAR(30),
+ Department VARCHAR(100),
+ NIC VARCHAR(20) UNIQUE,
+ Status VARCHAR(30),
+ Year INT,
+ Semester INT,
+ FOREIGN KEY (Student_ID) REFERENCES User(User_ID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Course (
+ Course_code VARCHAR(20) PRIMARY KEY,
+ Course_name VARCHAR(150) NOT NULL,
+ Academic_year INT,
+ Semester INT,
+ Theory_credits INT DEFAULT 0,
+ Practical_credits INT DEFAULT 0,
+ Theory_hours INT DEFAULT 0,
+ Practical_hours INT DEFAULT 0
+);
+
+CREATE TABLE Course_Material (
+ Material_ID INT AUTO_INCREMENT PRIMARY KEY,
+ Course_code VARCHAR(20) NOT NULL,
+ Lecturer_ID INT,
+ Title VARCHAR(150) NOT NULL,
+ Material_type VARCHAR(50),
+ File_path VARCHAR(255),
+ Uploaded_date DATE,
+ FOREIGN KEY (Course_code) REFERENCES Course(Course_code) ON DELETE CASCADE ON UPDATE CASCADE,
+ FOREIGN KEY (Lecturer_ID) REFERENCES Lecturer(Lecturer_ID) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE Notice (
+ Notice_ID INT AUTO_INCREMENT PRIMARY KEY,
+ Admin_ID INT,
+ Content TEXT,
+ Title VARCHAR(150) NOT NULL,
+ Published_date DATE,
+ FOREIGN KEY (Admin_ID) REFERENCES Admin(Admin_ID) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE Attendance (
+ Attendance_ID INT AUTO_INCREMENT PRIMARY KEY,
+ Student_ID INT NOT NULL,
+ Course_code VARCHAR(20) NOT NULL,
+ Session_date DATE NOT NULL,
+ Type ENUM('THEORY','PRACTICAL') NOT NULL,
+ FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID) ON DELETE CASCADE ON UPDATE CASCADE,
+ FOREIGN KEY (Course_code) REFERENCES Course(Course_code) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Medical (
+ Medical_ID INT AUTO_INCREMENT PRIMARY KEY,
+ Student_ID INT NOT NULL,
+ Attendance_ID INT,
+ Submission_date DATE,
+ Start_date DATE,
+ End_date DATE,
+ Reason TEXT,
+ Approval_status ENUM('PENDING','APPROVED','REJECTED') DEFAULT 'PENDING',
+ Status VARCHAR(30),
+ FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID) ON DELETE CASCADE ON UPDATE CASCADE,
+ FOREIGN KEY (Attendance_ID) REFERENCES Attendance(Attendance_ID) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE Marks (
+ Mark_ID INT AUTO_INCREMENT PRIMARY KEY,
+ Student_ID INT NOT NULL,
+ Course_code VARCHAR(20) NOT NULL,
+ CA_marks DECIMAL(5,2),
+ Final_exam_marks DECIMAL(5,2),
+ Total_marks DECIMAL(5,2),
+ Grade VARCHAR(5),
+ FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID) ON DELETE CASCADE ON UPDATE CASCADE,
+ FOREIGN KEY (Course_code) REFERENCES Course(Course_code) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE GPA (
+ GPA_ID INT AUTO_INCREMENT PRIMARY KEY,
+ Student_ID INT NOT NULL,
+ SGPA DECIMAL(4,2),
+ CGPA DECIMAL(4,2),
+ Semester INT,
+ FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Timetable (
+ Timetable_ID INT AUTO_INCREMENT PRIMARY KEY,
+ Course_code VARCHAR(20) NOT NULL,
+ Department VARCHAR(100),
+ Day VARCHAR(20),
+ Time_slot VARCHAR(50),
+ FOREIGN KEY (Course_code) REFERENCES Course(Course_code) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_attendance_student_course ON Attendance(Student_ID, Course_code);
+CREATE INDEX idx_marks_student_course ON Marks(Student_ID, Course_code);
+CREATE INDEX idx_course_material_course ON Course_Material(Course_code);
+CREATE INDEX idx_gpa_student ON GPA(Student_ID);
+CREATE INDEX idx_timetable_course ON Timetable(Course_code);
