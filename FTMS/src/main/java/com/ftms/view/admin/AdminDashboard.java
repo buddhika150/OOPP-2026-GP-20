@@ -32,7 +32,7 @@ public class AdminDashboard extends JFrame {
         );
         setContentPane(root);
 
-        // ================= SIDEBAR =================
+        //  SIDEBAR
 
         JPanel sidebar = new RoundedPanel(NAVY, 16);
         sidebar.setLayout(new BorderLayout());
@@ -108,7 +108,7 @@ public class AdminDashboard extends JFrame {
         sidebar.add(logout, BorderLayout.SOUTH);
         root.add(sidebar, BorderLayout.WEST);
 
-        // ================= MAIN CONTENT =================
+        // MAIN CONTENT
 
         JPanel content = new JPanel(new BorderLayout(0, 18));
         content.setOpaque(false);
@@ -139,7 +139,7 @@ public class AdminDashboard extends JFrame {
 
         content.add(top, BorderLayout.NORTH);
 
-        // ================= DASHBOARD BODY =================
+        // DASHBOARD BODY
 
         JPanel body = new JPanel(new BorderLayout(0, 20));
         body.setOpaque(false);
@@ -171,7 +171,7 @@ public class AdminDashboard extends JFrame {
         body.add(welcome, BorderLayout.NORTH);
 
 
-        // ================= MEDIUM-SIZE CARDS =================
+        // MEDIUM-SIZE CARDS
 
         JPanel cards = new JPanel(
                 new GridLayout(2, 2, 18, 18)
@@ -220,7 +220,7 @@ public class AdminDashboard extends JFrame {
         content.add(body, BorderLayout.CENTER);
         root.add(content, BorderLayout.CENTER);
 
-        // ================= BUTTON ACTIONS =================
+        //  BUTTON ACTIONS
 
         usersBtn.addActionListener(
                 e -> showPage("Manage Users")
@@ -262,7 +262,7 @@ public class AdminDashboard extends JFrame {
         setVisible(true);
     }
 
-    // ================= SIDEBAR BUTTON =================
+    // SIDEBAR BUTTON
 
     private JButton sideButton(String text, boolean active) {
 
@@ -297,7 +297,7 @@ public class AdminDashboard extends JFrame {
         return btn;
     }
 
-    // ================= MODERN CARD =================
+    //  MODERN CARD
 
     private JButton createCard(
             String iconType,
@@ -413,7 +413,7 @@ public class AdminDashboard extends JFrame {
         return button;
     }
 
-    // ================= DRAW ICONS =================
+    //  DRAW ICONS
 
     private void drawIcon(Graphics2D g, String type) {
 
@@ -471,7 +471,7 @@ public class AdminDashboard extends JFrame {
         }
     }
 
-    // ================= ROUNDED PANEL =================
+    // ROUNDED PANEL
 
     class RoundedPanel extends JPanel {
 
@@ -506,7 +506,7 @@ public class AdminDashboard extends JFrame {
         }
     }
 
-    // ================= PAGE MESSAGE =================
+    //  MESSAGE
 
     private void showPage(String name) {
 
@@ -516,7 +516,7 @@ public class AdminDashboard extends JFrame {
         );
     }
 
-    // ================= MAIN =================
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(AdminDashboard::new);
