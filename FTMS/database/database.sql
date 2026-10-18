@@ -2834,6 +2834,84 @@ INSERT INTO GPA (Student_ID, SGPA, CGPA, Semester) VALUES
                                                        (29, 2.61, 3.15, 1),
                                                        (30, 2.88, 3.4, 1);
 
+UPDATE student
+SET NIC = 200360109070 + Student_ID - 11;
+
+UPDATE user
+SET Phone = CONCAT('070', 4121960 + User_ID - 1);
+
+
+UPDATE user
+SET Email = CONCAT(Username, '@gmail.com');
+
+UPDATE user
+SET
+    Fname = CASE User_ID
+                WHEN 1 THEN 'Saman'
+                WHEN 2 THEN 'Nimal'
+                WHEN 3 THEN 'Kasun'
+                WHEN 4 THEN 'Amal'
+                WHEN 5 THEN 'Sunil'
+                WHEN 6 THEN 'Kamal'
+                WHEN 7 THEN 'Ruwan'
+                WHEN 8 THEN 'Chamara'
+                WHEN 9 THEN 'Lahiru'
+                WHEN 10 THEN 'Prasad'
+                WHEN 11 THEN 'Sahan'
+                WHEN 12 THEN 'Kavindu'
+                WHEN 13 THEN 'Tharindu'
+                WHEN 14 THEN 'Isuru'
+                WHEN 15 THEN 'Dinuka'
+                WHEN 16 THEN 'Sandun'
+                WHEN 17 THEN 'Pasindu'
+                WHEN 18 THEN 'Dilan'
+                WHEN 19 THEN 'Malith'
+                WHEN 20 THEN 'Nuwan'
+                WHEN 21 THEN 'Ashan'
+                WHEN 22 THEN 'Supun'
+                WHEN 23 THEN 'Dinesh'
+                WHEN 24 THEN 'Janith'
+                WHEN 25 THEN 'Buddhika'
+                WHEN 26 THEN 'Sachini'
+                WHEN 27 THEN 'Nethmi'
+                WHEN 28 THEN 'Kavisha'
+                WHEN 29 THEN 'Dilini'
+                WHEN 30 THEN 'Hansika'
+        END,
+    Lname = CASE User_ID
+                WHEN 1 THEN 'Perera'
+                WHEN 2 THEN 'Silva'
+                WHEN 3 THEN 'Fernando'
+                WHEN 4 THEN 'Kumara'
+                WHEN 5 THEN 'Jayasinghe'
+                WHEN 6 THEN 'Bandara'
+                WHEN 7 THEN 'Rathnayake'
+                WHEN 8 THEN 'Wijesinghe'
+                WHEN 9 THEN 'Madushan'
+                WHEN 10 THEN 'Gunasekara'
+                WHEN 11 THEN 'Pathirana'
+                WHEN 12 THEN 'Lakshan'
+                WHEN 13 THEN 'Sampath'
+                WHEN 14 THEN 'Dilshan'
+                WHEN 15 THEN 'Nimesh'
+                WHEN 16 THEN 'Chathuranga'
+                WHEN 17 THEN 'Madushanka'
+                WHEN 18 THEN 'Sanjaya'
+                WHEN 19 THEN 'Kavishka'
+                WHEN 20 THEN 'Sandaruwan'
+                WHEN 21 THEN 'Dhananjaya'
+                WHEN 22 THEN 'Nirmal'
+                WHEN 23 THEN 'Priyankara'
+                WHEN 24 THEN 'Harshana'
+                WHEN 25 THEN 'Sampath'
+                WHEN 26 THEN 'Fernando'
+                WHEN 27 THEN 'Perera'
+                WHEN 28 THEN 'Silva'
+                WHEN 29 THEN 'Kumari'
+                WHEN 30 THEN 'Jayawardena'
+        END
+WHERE User_ID BETWEEN 1 AND 30;
+
 -- Simple verification queries
 SELECT Role, COUNT(*) AS Total FROM `User` GROUP BY Role;
 SELECT Status, COUNT(*) AS Total FROM Student GROUP BY Status;
