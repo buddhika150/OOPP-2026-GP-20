@@ -1,4 +1,4 @@
-package model;
+package com.ftms.model;
 
 import java.util.*;
 

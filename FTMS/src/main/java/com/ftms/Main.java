@@ -1,3 +1,9 @@
-package FTMS\src\main\java\com\ftms;
+package com.ftms;
 
-public class Sample {}
+import com.ftms.view.lecturer.LecturerDashboard;
+
+public class Main {
+    public static void main(String[] args) {
+        new LecturerDashboard();
+    }
+}
