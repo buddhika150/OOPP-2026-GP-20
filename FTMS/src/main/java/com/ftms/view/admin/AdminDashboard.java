@@ -222,13 +222,15 @@ public class AdminDashboard extends JFrame {
 
         //  BUTTON ACTIONS
 
-        usersBtn.addActionListener(
-                e -> showPage("Manage Users")
-        );
+        usersBtn.addActionListener(e -> {
+            dispose();
+            new UserManagement();
+        });
 
-        coursesBtn.addActionListener(
-                e -> showPage("Manage Courses")
-        );
+        coursesBtn.addActionListener(e -> {
+            new CourseManagement();
+            dispose();
+        });
 
         noticesBtn.addActionListener(
                 e -> showPage("Manage Notices")
@@ -238,13 +240,15 @@ public class AdminDashboard extends JFrame {
                 e -> showPage("Timetable")
         );
 
-        usersCard.addActionListener(
-                e -> showPage("Manage Users")
-        );
+        usersCard.addActionListener(e -> {
+            dispose();
+            new UserManagement();
+        });
 
-        coursesCard.addActionListener(
-                e -> showPage("Manage Courses")
-        );
+        coursesCard.addActionListener(e -> {
+            new CourseManagement();
+            dispose();
+        });
 
         noticesCard.addActionListener(
                 e -> showPage("Manage Notices")
