@@ -1,6 +1,8 @@
 package com.ftms.view.lecturer;
+
 import javax.swing.*;
 import java.awt.*;
+import java.net.URL;
 
 
 public class LecturerDashboard extends JFrame{
@@ -21,11 +23,6 @@ public class LecturerDashboard extends JFrame{
         this.add(main_panel, BorderLayout.CENTER);  //slide bar and hear balence main panel;
 
 
-
-
-
-
-
         setVisible(true);
 
 }
@@ -38,7 +35,7 @@ private void setupWindow(){
         setLocationRelativeTo(null);            //open windo dispay center
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        Color bgcolor = new Color(242, 246, 250);
+        Color bgcolor = new Color(245, 249, 252);
         this.getContentPane().setBackground(bgcolor);
 
     this.setLayout(new BorderLayout());
@@ -48,14 +45,15 @@ private void setupWindow(){
 
     private void CreateHeading(){
 
-        JPanel heading_panel = new JPanel();
+        JPanel heading_panel = new JPanel(new BorderLayout());
         heading_panel.setPreferredSize(new Dimension(500,200));
+        heading_panel.setBackground(new Color(245, 249, 252));
+        heading_panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 30));
 
 
         JLabel Heading =  new JLabel();
         Heading.setText("Welcome Lecturer");
-        Heading.setHorizontalAlignment(JLabel.CENTER);  // Left -> center
-        Heading.setVerticalAlignment(JLabel.TOP);
+        Heading.setVerticalAlignment(JLabel.CENTER);
 
         Color h_color = new Color(16,45,79);
         Heading.setForeground(h_color);
@@ -63,55 +61,85 @@ private void setupWindow(){
 
         heading_panel.add(Heading);
 
+        URL headin_image_path = getClass().getResource("/images/header_image.png");
+        ImageIcon heading_icon = new ImageIcon(headin_image_path);
+        JLabel image_label = new JLabel(heading_icon);
+        heading_panel.add(image_label, BorderLayout.EAST);
+
 
         main_panel.add(heading_panel,BorderLayout.NORTH);
 
     }
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                 // Main Button
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private void CreateButton(){
 
 
         JPanel button_panel = new JPanel();
-        Color button_panel_color = new Color(242,246,250);
+        Color button_panel_color = new Color(245, 249, 252);
         button_panel.setBackground(button_panel_color);
 
 
-        Color buttoncolor = new Color(0,143,156);
-        Dimension button_size = new Dimension(300,200);
+        Color buttoncolor = new Color(255, 255, 255);
+        Color button_text_color = new Color(16, 45, 79);
+        Dimension button_size = new Dimension(300,180);
 
-        //Manage botton
+        //utton_panel.setLayout(new FlowLayout(FlowLayout.CENTER,20,20));
+        button_panel.setLayout(new GridLayout(3, 2, 20, 20));
+
+        //my courses botton
 
 
-        JButton Mange_Button  = new JButton();
-        Mange_Button.setText("ManageCourses");
-        Mange_Button.setFont(new Font("Arial",Font.BOLD,30));
+        JButton my_course_Button  = new JButton();
+        my_course_Button.setText("My Courses");
+        my_course_Button.setFont(new Font("Arial",Font.BOLD,30));
 
-        Mange_Button.setBackground(buttoncolor);
-        Mange_Button.setForeground(Color.WHITE);
-        Mange_Button.setPreferredSize(button_size);
+        my_course_Button.setBackground(buttoncolor);
+        my_course_Button.setForeground(button_text_color);
+        my_course_Button.setPreferredSize(button_size);
 
-        button_panel.add(Mange_Button);
+        URL mange_path = getClass().getResource("/images/manae_icon.png");
+        ImageIcon mange_icon = new ImageIcon(mange_path);
+        my_course_Button.setIcon(mange_icon);
+
+
+
+
+        button_panel.add(my_course_Button);
 
         //Action
 
-        Mange_Button.addActionListener(e -> {
+        my_course_Button.addActionListener(e -> {
 
-            ManageCourses M_Window = new  ManageCourses();
+            MyCourses M_Window = new MyCourses();
+        //    this.setVisible(false);   //no class only hide
         });
 
 
-        //UPload button
+        //UPload  Material button
 
-        JButton upload_Button = new JButton();
-        upload_Button.setText("Upload Materials");
-        upload_Button.setFont(new Font("Arial",Font.BOLD,30));
+        JButton upload_matatial_Button = new JButton();
+        upload_matatial_Button.setText("Upload Materials");
+        upload_matatial_Button.setFont(new Font("Arial",Font.BOLD,30));
 
-        upload_Button.setBackground(buttoncolor);
-        upload_Button.setForeground(Color.WHITE);
-        upload_Button.setPreferredSize(button_size);
+        upload_matatial_Button.setBackground(buttoncolor);
+        upload_matatial_Button.setForeground(button_text_color);
+        upload_matatial_Button.setPreferredSize(button_size);
 
 
-        button_panel.add(upload_Button);
+        URL upload_matarial_path = getClass().getResource("/images/upload_metarial_icon.png");
+        ImageIcon upload_matarial_icon = new ImageIcon(upload_matarial_path);
+        upload_matatial_Button.setIcon(upload_matarial_icon);
+
+
+        button_panel.add(upload_matatial_Button);
+
+        upload_matatial_Button.addActionListener(e -> {
+
+            new CourseMaterials();
+
+        });
 
         //Upload marks
 
@@ -121,9 +149,12 @@ private void setupWindow(){
 
         button_panel.add(upload_marks);
         upload_marks.setBackground(buttoncolor);
-        upload_marks.setForeground(Color.WHITE);
+        upload_marks.setForeground(button_text_color);
         upload_marks.setPreferredSize(button_size);
 
+        URL upload_marks_path = getClass().getResource("/images/upload_button_icon.png");
+        ImageIcon upload_marks_icon = new ImageIcon(upload_marks_path);
+        upload_marks.setIcon(upload_marks_icon);
 
 
 
@@ -135,8 +166,12 @@ private void setupWindow(){
 
         button_panel.add(attendance_summary);
         attendance_summary.setBackground(buttoncolor);
-        attendance_summary.setForeground(Color.WHITE);
+        attendance_summary.setForeground(button_text_color);
         attendance_summary.setPreferredSize(button_size);
+
+        URL attendance_path = getClass().getResource("/images/atendance_icon.png");
+        ImageIcon attandance_icon = new ImageIcon(attendance_path);
+        attendance_summary.setIcon(attandance_icon);
 
 
 
@@ -150,15 +185,13 @@ private void setupWindow(){
 
         button_panel.add(student_eligibility);
         student_eligibility.setBackground(buttoncolor);
-        student_eligibility.setForeground(Color.WHITE);
+        student_eligibility.setForeground(button_text_color);
         student_eligibility.setPreferredSize(button_size);
 
+        URL student_path = getClass().getResource("/images/Student_icon.png");
+        ImageIcon student_path_icon = new ImageIcon(student_path);
+        student_eligibility.setIcon(student_path_icon);
 
-
-
-        //button_panel.setLayout(new GridLayout(3,2 ,15,15));
-        button_panel.setLayout(new FlowLayout());
-        button_panel.setPreferredSize(new Dimension(550, 360));
 
 
 
@@ -167,6 +200,7 @@ private void setupWindow(){
 
         JPanel center_panel = new JPanel();
         center_panel.setLayout(new GridLayout(1,1,0,0));
+
 
         center_panel.setBorder(BorderFactory.createEmptyBorder(40,50,40,50));
 
@@ -178,8 +212,12 @@ private void setupWindow(){
     }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                              //sidebar
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private  void CreaterSidebar(){
+
+private  void CreaterSidebar(){
 
         JPanel sidebar = new JPanel();
         Color sidebar_color = new Color(16,45,79);
@@ -187,6 +225,31 @@ private void setupWindow(){
         sidebar.setBackground(sidebar_color);
 
         this.add(sidebar , BorderLayout.WEST);
+
+
+    // FTMS text
+
+    JLabel sidebar_headr_text = new JLabel("FTMS");
+    sidebar_headr_text.setForeground(Color.WHITE);
+    sidebar_headr_text.setFont(new Font("Arial",Font.BOLD,40));
+    sidebar.add(sidebar_headr_text);
+
+
+    //FACULTY OF TECHNOLOGY
+    //MANAGEMENT SYSTEM   text
+
+    JLabel sidebar_dear_text_2 = new JLabel("FACULTY OF TECHNOLOGY");
+    sidebar_dear_text_2.setForeground(Color.WHITE);
+    sidebar_dear_text_2.setFont(new Font("Arial",Font.BOLD,15));
+    sidebar.add(sidebar_dear_text_2);
+
+
+    JLabel sidebar_dear_text_3 = new JLabel("MANAGEMENT SYSTEM");
+    sidebar_dear_text_3.setForeground(Color.WHITE);
+    sidebar_dear_text_3.setFont(new Font("Arial",Font.BOLD,15));
+    sidebar.add(sidebar_dear_text_3);
+
+
 
         //side bar button common variable
 
@@ -209,6 +272,18 @@ private void setupWindow(){
         dashbord_button.setPreferredSize(sidebar_button_size);
 
 
+        URL Dash_path = getClass().getResource("/images/house.png");
+        ImageIcon dashbord_icon = new ImageIcon(Dash_path);
+        dashbord_button.setIcon(dashbord_icon);
+
+
+        dashbord_button.setHorizontalAlignment(SwingConstants.LEFT);
+        dashbord_button.setIconTextGap(15);
+
+
+
+
+
         //Mange course
 
         JButton manage_course_button = new JButton("Manage Course");
@@ -218,8 +293,15 @@ private void setupWindow(){
         manage_course_button.setBackground(sidebar_button_color);
         manage_course_button.setForeground(Color.WHITE);
 
+        URL manage_path = getClass().getResource("/images/book.png");
+        ImageIcon manage_icon = new ImageIcon(manage_path);
+        manage_course_button.setIcon(manage_icon);
 
-        //Upload Marks
+        manage_course_button.setHorizontalAlignment(SwingConstants.LEFT);
+        manage_course_button.setIconTextGap(15);
+
+
+        //course material
 
         JButton course_material_button = new JButton("Course Materials");
         sidebar.add(course_material_button);
@@ -228,6 +310,12 @@ private void setupWindow(){
         course_material_button.setBackground(sidebar_button_color);
         course_material_button.setForeground(Color.WHITE);
 
+         URL course_path = getClass().getResource("/images/file.png");
+         ImageIcon course_icon = new ImageIcon(course_path);
+         course_material_button.setIcon(course_icon);
+
+         course_material_button.setHorizontalAlignment(SwingConstants.LEFT);
+         course_material_button.setIconTextGap(15);
 
         //log out
 
@@ -237,6 +325,15 @@ private void setupWindow(){
         logout_button.setPreferredSize(sidebar_button_size);
         logout_button.setBackground(sidebar_button_color);
         logout_button.setForeground(Color.WHITE);
+
+
+        URL log_path = getClass().getResource("/images/logout.png");
+        ImageIcon log_icon = new ImageIcon(log_path);
+        logout_button.setIcon(log_icon);
+
+
+        logout_button.setHorizontalAlignment(SwingConstants.LEFT);
+        logout_button.setIconTextGap(15);
 
 
 
