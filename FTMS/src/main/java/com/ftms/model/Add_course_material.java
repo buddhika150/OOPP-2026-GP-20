@@ -7,9 +7,17 @@ import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+
+
 public class Add_course_material extends JFrame {
 
-    public Add_course_material() {
+    private int lecturerId;
+
+    public Add_course_material(int lecturerId) {
+
+        this.lecturerId = lecturerId;
+
+
 
         add_mateial();
         create_material_upload();

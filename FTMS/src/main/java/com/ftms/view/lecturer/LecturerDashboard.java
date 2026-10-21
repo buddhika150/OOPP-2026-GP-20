@@ -5,14 +5,17 @@ import java.awt.*;
 import java.net.URL;
 
 
+
+
 public class LecturerDashboard extends JFrame{
 
        JPanel main_panel = new JPanel(new BorderLayout());    //slide bar and dear balence main panel
 
+        private int lectureId;
 
-    public LecturerDashboard(){
+    public LecturerDashboard(int lectureId){
 
-
+        this.lectureId = lectureId;
 
 
         setupWindow();
@@ -112,7 +115,7 @@ private void setupWindow(){
 
         my_course_Button.addActionListener(e -> {
 
-            MyCourses M_Window = new MyCourses();
+            new MyCourses(lectureId);       //lecutureta adal coures eak withrak penna nm meke id ek pss krnn oni
         //    this.setVisible(false);   //no class only hide
         });
 
@@ -137,7 +140,7 @@ private void setupWindow(){
 
         upload_matatial_Button.addActionListener(e -> {
 
-            new CourseMaterials();
+            new CourseMaterials(lectureId);
 
         });
 
@@ -156,6 +159,10 @@ private void setupWindow(){
         ImageIcon upload_marks_icon = new ImageIcon(upload_marks_path);
         upload_marks.setIcon(upload_marks_icon);
 
+        upload_marks.addActionListener(e -> {
+             new UploadMarks(lectureId);
+        });
+
 
 
         //Attendance Summary
@@ -172,6 +179,12 @@ private void setupWindow(){
         URL attendance_path = getClass().getResource("/images/atendance_icon.png");
         ImageIcon attandance_icon = new ImageIcon(attendance_path);
         attendance_summary.setIcon(attandance_icon);
+
+        attendance_summary.addActionListener(e -> {
+
+          new LecturerAttendanceSummary(lectureId);
+
+        });
 
 
 

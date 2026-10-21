@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 
 import com.ftms.model.Add_course_material;
 
+
 public class CourseMaterials extends JFrame {
 
 
@@ -22,8 +23,12 @@ public class CourseMaterials extends JFrame {
 
     JPanel top_panel = new JPanel(new BorderLayout(10,10));
 
+    private int lecturerId;
 
-  public   CourseMaterials(){
+
+  public   CourseMaterials(int lecturerId) {
+
+      this.lecturerId = lecturerId;
 
       setupwindow();
       create_heading();
@@ -100,7 +105,7 @@ public class CourseMaterials extends JFrame {
 
       material_upload_button.addActionListener(e -> {
 
-          new Add_course_material();
+          new Add_course_material(lecturerId);
 
       });
 
@@ -108,8 +113,8 @@ public class CourseMaterials extends JFrame {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //sidebar
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //sideba
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     private  void CreaterSidebar(){
@@ -178,7 +183,7 @@ public class CourseMaterials extends JFrame {
 
         dashbord_button.addActionListener(e -> {
 
-            LecturerDashboard lecturerDashboard1 = new LecturerDashboard();
+            LecturerDashboard lecturerDashboard1 = new LecturerDashboard(lecturerId);
 
            // this.setVisible(false);
 
@@ -238,6 +243,9 @@ public class CourseMaterials extends JFrame {
 
 
     }
+
+
+
 
 //delet option
 
@@ -324,9 +332,11 @@ private  void material_tabel(){
         try{
 
             Connection con = DatabaseConnection.getConnection();
-            String sql = "SELECT * FROM course_material";
+            String sql = "SELECT * FROM course_material WHERE Lecturer_ID = ?";
 
             PreparedStatement pst = con.prepareStatement(sql);
+
+            pst.setInt(1, lecturerId);
 
             ResultSet rs = pst.executeQuery();
 
@@ -344,7 +354,7 @@ private  void material_tabel(){
                 };
 
                 model.addRow(row);
-
+//lil
             }
 
             rs.close();
@@ -364,6 +374,7 @@ private  void material_tabel(){
 
 }
 
+
     private void deleteMaterial(int id, DefaultTableModel model, int row) {
 
         int confirm = JOptionPane.showConfirmDialog(
@@ -378,12 +389,15 @@ private  void material_tabel(){
         }
 
         try {
+
             Connection con = DatabaseConnection.getConnection();
 
-            String sql = "DELETE FROM course_material WHERE Material_ID = ?";
+            String sql = "DELETE FROM course_material WHERE Material_ID = ? AND Lecturer_ID = ?";
 
             PreparedStatement pst = con.prepareStatement(sql);
+
             pst.setInt(1, id);
+            pst.setInt(2, lecturerId);
 
             int result = pst.executeUpdate();
 

@@ -1,3 +1,4 @@
+
 package com.ftms.view.lecturer;
 
 import com.ftms.database.DatabaseConnection;
@@ -17,29 +18,33 @@ public class MyCourses extends JFrame{
 
     JPanel main_panel = new JPanel(new BorderLayout(10,10));
 
-   MyCourses(){
+    private int lecturerId;
 
-       windwo();
-       Heading();
-       createTabel();
-       CreaterSidebar();
+    MyCourses(int lecturerId){
 
-       setVisible(true);
+        this.lecturerId = lecturerId;
 
-   }
+        windwo();
+        Heading();
+        createTabel();
+        CreaterSidebar();
+
+        setVisible(true);
+
+    }
 
 
 
     private void windwo(){
 
 
-       setTitle("My courses");
-       setSize(800 ,500);
-       setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-       setLayout(new BorderLayout(10 , 10));
-       getContentPane().setBackground(new Color(245, 249, 252));
+        setTitle("My courses");
+        setSize(800 ,500);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10 , 10));
+        getContentPane().setBackground(new Color(245, 249, 252));
 
-       this.add(main_panel,BorderLayout.CENTER);
+        this.add(main_panel,BorderLayout.CENTER);
 
     }
 
@@ -69,28 +74,28 @@ public class MyCourses extends JFrame{
     private void createTabel(){
 
 
-       String[] colums = {
-               "Course Code",
-               "Course Name",
-               "Semester",
-               "Acadamic Year"
-       };
+        String[] colums = {
+                "Course Code",
+                "Course Name",
+                "Semester",
+                "Acadamic Year"
+        };
 
-       DefaultTableModel database_data_gate_model = new DefaultTableModel(colums,0);
+        DefaultTableModel database_data_gate_model = new DefaultTableModel(colums,0);
 
-       JTable course_tabel = new JTable(database_data_gate_model);
+        JTable course_tabel = new JTable(database_data_gate_model);
 
-       course_tabel.setRowHeight(30);  //one raw hight
-       JScrollPane can_scroll = new JScrollPane(course_tabel);
+        course_tabel.setRowHeight(30);  //one raw hight
+        JScrollPane can_scroll = new JScrollPane(course_tabel);
 
-       main_panel.add(can_scroll,BorderLayout.CENTER);
+        main_panel.add(can_scroll,BorderLayout.CENTER);
 
         // colums desing
-       course_tabel.getTableHeader().setFont(new Font("arial",Font.BOLD,16));
-       course_tabel.getTableHeader().setBackground(new Color(220,235,250));
-       course_tabel.getTableHeader().setPreferredSize(new Dimension(100,45));
+        course_tabel.getTableHeader().setFont(new Font("arial",Font.BOLD,16));
+        course_tabel.getTableHeader().setBackground(new Color(220,235,250));
+        course_tabel.getTableHeader().setPreferredSize(new Dimension(100,45));
 
-       //rows deding
+        //rows deding
 
         course_tabel.setFont(new Font("arial", Font.PLAIN, 15));
 
@@ -100,12 +105,17 @@ public class MyCourses extends JFrame{
 
     private void loadCourses(DefaultTableModel  model) {
 
-        String sql = "SELECT Course_code, Course_name, Semester, Academic_year FROM course";
+        String sql = "SELECT c.Course_code, c.Course_name, c.Semester, c.Academic_year " +
+                "FROM course c " +
+                "INNER JOIN lecturer_course lc ON c.Course_code = lc.Course_code " +
+                "WHERE lc.Lecturer_ID = ?";
 
         try {
 
             Connection con = DatabaseConnection.getConnection();
             PreparedStatement pst = con.prepareStatement(sql);
+
+            pst.setInt(1, lecturerId);
 
             ResultSet rs = pst.executeQuery();
 
@@ -132,10 +142,10 @@ public class MyCourses extends JFrame{
 
 
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //sidebar
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     private  void CreaterSidebar() {
 
@@ -200,7 +210,7 @@ public class MyCourses extends JFrame{
         dashbord_button.setIconTextGap(15);
 
         dashbord_button.addActionListener(e -> {
-            new LecturerDashboard();
+            new LecturerDashboard(lecturerId);
 
             //this.setVisible(false);
         });
@@ -259,4 +269,3 @@ public class MyCourses extends JFrame{
 
     }
 }
-
