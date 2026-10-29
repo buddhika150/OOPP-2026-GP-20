@@ -1,38 +1,31 @@
 package com.ftms.view.student;
 
 import com.ftms.dao.MarksDAO;
+import com.ftms.view.Login;
 import com.ftms.model.GPA;
 import com.ftms.model.Marks;
 import com.ftms.model.Undergraduate;
 import com.ftms.util.SessionManager;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
 public class StudentDashboard extends JFrame {
-    private Undergraduate currentStudent;
-    private CardLayout cardLayout;
-    private JPanel mainContentPanel;
-
-    private ProfilePanel profilePanel;
-    private CoursesPanel coursesPanel;
-    private AttendancePanel attendancePanel;
-    private EligibilityPanel eligibilityPanel;
-    private GradesAndGpaPanel gradesAndGpaPanel;
+    private final Undergraduate currentStudent;
+    private final DashboardHomePanel homePanel;
+    private final ProfilePanel profilePanel;
+    private final CoursesPanel coursesPanel;
+    private final AttendancePanel attendancePanel;
+    private final EligibilityPanel eligibilityPanel;
+    private final GradesAndGpaPanel gradesAndGpaPanel;
 
     public StudentDashboard() {
-        int loggedInUserId = SessionManager.getInstance().getLoggedInUserId();
-        if (loggedInUserId == -1) {
-            loggedInUserId = 11; // Default fallback for testing
-        }
-
+        int id = SessionManager.getInstance().getLoggedInUserId();
+        if (id < 0) throw new IllegalStateException("Student login is required.");
         MarksDAO dao = new MarksDAO();
-        this.currentStudent = dao.getStudentDetails(loggedInUserId);
-
-        if (currentStudent == null) {
-            this.currentStudent = dao.getStudentDetails(11);
-        }
+        currentStudent = dao.getStudentDetails(id);
+        if (currentStudent == null || currentStudent.getStudentId() != id)
+            throw new IllegalStateException("Logged-in student not found in database.");
 
         setTitle("FTMS - Student Dashboard");
         setSize(1200, 700);
@@ -40,115 +33,71 @@ public class StudentDashboard extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Initialize Panels
-        DashboardHomePanel dashboardHomePanel = new DashboardHomePanel(currentStudent);
+        homePanel = new DashboardHomePanel(currentStudent);
         profilePanel = new ProfilePanel(currentStudent);
         coursesPanel = new CoursesPanel();
         attendancePanel = new AttendancePanel();
         eligibilityPanel = new EligibilityPanel();
         gradesAndGpaPanel = new GradesAndGpaPanel();
 
-        // Main Content Area with CardLayout
-        cardLayout = new CardLayout();
-        mainContentPanel = new JPanel(cardLayout);
-
-        mainContentPanel.add(dashboardHomePanel, "Dashboard");
-        mainContentPanel.add(profilePanel, "Profile");
-        mainContentPanel.add(coursesPanel, "Courses");
-        mainContentPanel.add(attendancePanel, "Attendance");
-        mainContentPanel.add(eligibilityPanel, "Eligibility");
-        mainContentPanel.add(gradesAndGpaPanel, "Grades");
-
-        // Left Sidebar Panel
-        SidebarPanel sidebarPanel = new SidebarPanel(cardLayout, mainContentPanel, this, profilePanel, this::loadStudentDataIntoUI);
-        add(sidebarPanel, BorderLayout.WEST);
-        add(mainContentPanel, BorderLayout.CENTER);
-
-        loadStudentDataIntoUI();
+        CardLayout layout = new CardLayout();
+        JPanel content = new JPanel(layout);
+        content.add(homePanel, "Dashboard");
+        content.add(profilePanel, "Profile");
+        content.add(coursesPanel, "Courses");
+        content.add(attendancePanel, "Attendance");
+        content.add(eligibilityPanel, "Eligibility");
+        content.add(gradesAndGpaPanel, "Grades");
+        add(new SidebarPanel(layout, content, this, profilePanel, this::refreshData), BorderLayout.WEST);
+        add(content, BorderLayout.CENTER);
+        refreshData();
     }
 
-    private void loadStudentDataIntoUI() {
-        if (currentStudent == null) return;
-
-        gradesAndGpaPanel.getLblStudentSummary().setText("Student ID: " + currentStudent.getTgNum() +
-                " | Program: " + currentStudent.getDepartment() +
-                " | Batch: " + currentStudent.getBatch() +
-                " | Semester: " + currentStudent.getSemester() +
-                " | Academic Year: " + currentStudent.getYear());
-
+    private void refreshData() {
+        int id = currentStudent.getStudentId();
         MarksDAO dao = new MarksDAO();
-        List<Marks> marksList = dao.getMarksByStudentId(currentStudent.getStudentId());
+        List<Marks> marks = dao.getMarksByStudentId(id);
+        coursesPanel.loadCourses();
+        attendancePanel.refreshAttendance();
+        homePanel.refreshData();
 
+        gradesAndGpaPanel.getLblStudentSummary().setText(
+                "Student ID: " + currentStudent.getTgNum() +
+                        " | Program: " + currentStudent.getDepartment() +
+                        " | Batch: " + currentStudent.getBatch() +
+                        " | Semester: " + currentStudent.getSemester() +
+                        " | Academic Year: " + currentStudent.getYear());
         gradesAndGpaPanel.getMarksTableModel().setRowCount(0);
-        if (coursesPanel.getCoursesTableModel() != null) coursesPanel.getCoursesTableModel().setRowCount(0);
-        if (attendancePanel.getAttendanceTableModel() != null) attendancePanel.getAttendanceTableModel().setRowCount(0);
-        if (eligibilityPanel.getEligibilityTableModel() != null) eligibilityPanel.getEligibilityTableModel().setRowCount(0);
-
-        double grandTotal = 0;
-        int courseCount = marksList.size();
-        boolean allEligible = true;
-
-        for (Marks m : marksList) {
-            grandTotal += m.getTotalMarks();
-            boolean isEligible = m.viewMyEligibility();
-            if (!isEligible) allEligible = false;
-
-            // 1. Grades Table Row
+        eligibilityPanel.getEligibilityTableModel().setRowCount(0);
+        double total = 0;
+        boolean eligible = !marks.isEmpty();
+        for (Marks m : marks) {
+            total += m.getTotalMarks();
+            boolean courseEligible = m.viewMyEligibility();
+            eligible &= courseEligible;
             gradesAndGpaPanel.getMarksTableModel().addRow(new Object[]{
-                    m.getCourseCode(),
-                    m.getCourseName(),
-                    m.getCaMarks(),
-                    m.getFinalExamMarks(),
-                    m.getTotalMarks(),
-                    m.getGrade()
-            });
-
-            // 2. Courses Table Row
-            if (coursesPanel.getCoursesTableModel() != null) {
-                coursesPanel.getCoursesTableModel().addRow(new Object[]{m.getCourseCode(), m.getCourseName()});
-            }
-
-            // 3. Attendance Table Row
-            if (attendancePanel.getAttendanceTableModel() != null) {
-                attendancePanel.getAttendanceTableModel().addRow(new Object[]{m.getCourseCode(), m.getCourseName(), 30, 28, "93.33%"});
-            }
-
-            // 4. Eligibility Table Row
-            if (eligibilityPanel.getEligibilityTableModel() != null) {
-                eligibilityPanel.getEligibilityTableModel().addRow(new Object[]{
-                        m.getCourseCode(),
-                        m.getCourseName(),
-                        m.getCaMarks(),
-                        "40.0",
-                        isEligible ? "ELIGIBLE" : "NOT ELIGIBLE"
-                });
-            }
+                    m.getCourseCode(), m.getCourseName(), m.getCaMarks(),
+                    m.getFinalExamMarks(), m.getTotalMarks(), m.getGrade()});
+            eligibilityPanel.getEligibilityTableModel().addRow(new Object[]{
+                    m.getCourseCode(), m.getCourseName(), m.getCaMarks(),
+                    "40.0", courseEligible ? "ELIGIBLE" : "NOT ELIGIBLE"});
         }
-
-        gradesAndGpaPanel.getLblTotalCourses().setText("Total Courses: " + courseCount);
-        gradesAndGpaPanel.getLblTotalMarks().setText("Total Marks: " + (int)grandTotal + "/" + (courseCount > 0 ? courseCount * 100 : 100));
-        if (courseCount > 0) {
-            gradesAndGpaPanel.getLblPercentage().setText(String.format("Percentage: %.2f%%", grandTotal / courseCount));
-        }
-
-        GPA gpa = dao.getGPAByStudentId(currentStudent.getStudentId());
-        if (gpa != null) {
-            gradesAndGpaPanel.getLblSgpa().setText(String.format("%.2f", gpa.getSgpa()));
-            gradesAndGpaPanel.getLblCgpa().setText(String.format("%.2f", gpa.getCgpa()));
-        }
-
-        if (allEligible) {
-            gradesAndGpaPanel.getLblCaStatus().setText("Eligible");
-            gradesAndGpaPanel.getLblCaStatus().setForeground(new Color(0, 150, 0));
-        } else {
-            gradesAndGpaPanel.getLblCaStatus().setText("Not Eligible");
-            gradesAndGpaPanel.getLblCaStatus().setForeground(Color.RED);
-        }
-
+        gradesAndGpaPanel.getLblTotalCourses().setText("Total Courses: " + marks.size());
+        gradesAndGpaPanel.getLblTotalMarks().setText(
+                "Total Marks: " + String.format("%.2f", total) + " / " + (marks.size() * 100));
+        gradesAndGpaPanel.getLblPercentage().setText(marks.isEmpty() ?
+                "Percentage: --" : String.format("Percentage: %.2f%%", total / marks.size()));
+        GPA gpa = dao.getGPAByStudentId(id);
+        gradesAndGpaPanel.getLblSgpa().setText(gpa == null ? "--" : String.format("%.2f", gpa.getSgpa()));
+        gradesAndGpaPanel.getLblCgpa().setText(gpa == null ? "--" : String.format("%.2f", gpa.getCgpa()));
+        gradesAndGpaPanel.getLblCaStatus().setText(marks.isEmpty() ? "No Results" :
+                eligible ? "Eligible" : "Not Eligible");
+        gradesAndGpaPanel.getLblCaStatus().setForeground(
+                marks.isEmpty() ? Color.GRAY : eligible ? new Color(0, 150, 0) : Color.RED);
         profilePanel.updateProfileData();
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new StudentDashboard().setVisible(true));
+        SwingUtilities.invokeLater(() -> new Login().setVisible(true));
     }
 }
