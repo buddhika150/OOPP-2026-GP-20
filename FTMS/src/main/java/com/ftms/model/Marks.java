@@ -25,6 +25,7 @@ public class Marks {
     public String getGrade() { return grade; }
 
     public boolean viewMyEligibility() {
+        // CA marks are out of 100; the project requires at least 40%.
         return caMarks >= 40.0;
     }
 }

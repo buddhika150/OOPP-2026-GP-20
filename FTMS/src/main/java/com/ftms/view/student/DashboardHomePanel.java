@@ -1,138 +1,117 @@
 package com.ftms.view.student;
 
+import com.ftms.dao.AttendanceDAO;
+import com.ftms.dao.CourseDAO;
+import com.ftms.dao.MarksDAO;
+import com.ftms.model.AttendanceRecord;
+import com.ftms.model.GPA;
+import com.ftms.model.Marks;
 import com.ftms.model.Undergraduate;
 import javax.swing.*;
 import java.awt.*;
-import java.net.URL;
+import java.util.List;
 
 public class DashboardHomePanel extends JPanel {
-    private JProgressBar attendanceProgressBar;
-    private JLabel lblAttendanceText;
-    private JLabel lblWelcome;
+    private final Undergraduate student;
+    private final JTextArea coursesText = new JTextArea();
+    private final JTextArea eligibilityText = new JTextArea();
+    private final JTextArea gradesText = new JTextArea();
+    private final JLabel attendanceText = new JLabel("Attendance: --");
+    private final JProgressBar attendanceBar = new JProgressBar(0, 100);
 
-    public DashboardHomePanel(Undergraduate currentStudent) {
+    public DashboardHomePanel(Undergraduate student) {
+        this.student = student;
         setLayout(new BorderLayout(15, 15));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setBackground(new Color(245, 247, 250));
+        JPanel header = new JPanel(new GridLayout(2, 1, 0, 10));
+        header.setOpaque(false);
+        JLabel title = new JLabel("Student Dashboard");
+        title.setFont(new Font("Arial", Font.BOLD, 24));
+        header.add(title);
+        JLabel welcome = new JLabel("Welcome Back, " + student.getFname() + " " + student.getLname() + "!");
+        welcome.setFont(new Font("Arial", Font.BOLD, 20));
+        header.add(welcome);
+        add(header, BorderLayout.NORTH);
 
-        JPanel topHeaderPanel = new JPanel(new BorderLayout());
-        topHeaderPanel.setBackground(getBackground());
-
-        JPanel titleAndRolePanel = new JPanel(new BorderLayout());
-        titleAndRolePanel.setBackground(getBackground());
-
-        JLabel lblTitle = new JLabel("Student Dashboard");
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 24));
-        titleAndRolePanel.add(lblTitle, BorderLayout.WEST);
-
-        JLabel lblRoleBadge = new JLabel("STUDENT", SwingConstants.RIGHT);
-        lblRoleBadge.setFont(new Font("Arial", Font.BOLD, 14));
-        lblRoleBadge.setForeground(new Color(0, 130, 130));
-        titleAndRolePanel.add(lblRoleBadge, BorderLayout.EAST);
-
-        topHeaderPanel.add(titleAndRolePanel, BorderLayout.NORTH);
-
-        JPanel bannerCard = new JPanel(new BorderLayout());
-        bannerCard.setBackground(Color.WHITE);
-        bannerCard.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 225, 235)),
-                BorderFactory.createEmptyBorder(20, 25, 20, 25)
-        ));
-
-        JPanel bannerTextPanel = new JPanel(new GridLayout(2, 1, 5, 5));
-        bannerTextPanel.setBackground(Color.WHITE);
-
-        String studentName = (currentStudent != null) ? currentStudent.getFname() + " " + currentStudent.getLname() : "Student";
-        lblWelcome = new JLabel("Welcome Back, " + studentName + "!");
-        lblWelcome.setFont(new Font("Arial", Font.BOLD, 22));
-        lblWelcome.setForeground(new Color(30, 40, 60));
-
-        JLabel lblSubtitleDesc = new JLabel("Here's an overview of your academic activities and progress.");
-        lblSubtitleDesc.setFont(new Font("Arial", Font.PLAIN, 13));
-        lblSubtitleDesc.setForeground(new Color(110, 120, 135));
-
-        bannerTextPanel.add(lblWelcome);
-        bannerTextPanel.add(lblSubtitleDesc);
-        bannerCard.add(bannerTextPanel, BorderLayout.WEST);
-
-        JLabel lblBannerImage = new JLabel();
-        try {
-            URL imgUrl = getClass().getResource("/images/dashboardimage.png");
-            if (imgUrl != null) {
-                ImageIcon icon = new ImageIcon(imgUrl);
-                Image scaledImg = icon.getImage().getScaledInstance(220, 90, Image.SCALE_SMOOTH);
-                lblBannerImage.setIcon(new ImageIcon(scaledImg));
-            } else {
-                lblBannerImage.setText("[Image Not Found]");
-            }
-        } catch (Exception e) {
-            lblBannerImage.setText("[Image Error]");
-        }
-        bannerCard.add(lblBannerImage, BorderLayout.EAST);
-
-        JPanel bannerWrapper = new JPanel(new BorderLayout());
-        bannerWrapper.setBackground(getBackground());
-        bannerWrapper.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
-        bannerWrapper.add(bannerCard, BorderLayout.CENTER);
-
-        topHeaderPanel.add(bannerWrapper, BorderLayout.CENTER);
-        add(topHeaderPanel, BorderLayout.NORTH);
-
-        JPanel cardsGrid = new JPanel(new GridLayout(2, 2, 15, 15));
-        cardsGrid.setBackground(getBackground());
-
-        cardsGrid.add(createDashboardCard("My Courses", "• Software Engineering (SE101)\n• Database Systems (DB201)\n• Data Structures (CS204)\n• Computer Networks (CN301)"));
-
-        JPanel attCard = new JPanel(new BorderLayout(10, 10));
-        attCard.setBackground(Color.WHITE);
-        attCard.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 225, 235)),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
-        JLabel attTitle = new JLabel("Attendance");
-        attTitle.setFont(new Font("Arial", Font.BOLD, 15));
-        attCard.add(attTitle, BorderLayout.NORTH);
-
-        JPanel attContent = new JPanel(new GridLayout(2, 1, 5, 5));
-        attContent.setBackground(Color.WHITE);
-        attendanceProgressBar = new JProgressBar(0, 100);
-        attendanceProgressBar.setValue(92);
-        attendanceProgressBar.setStringPainted(true);
-        attendanceProgressBar.setForeground(new Color(0, 150, 150));
-
-        lblAttendanceText = new JLabel("Present: 92%   |   Absent: 8% (Overall)");
-        lblAttendanceText.setFont(new Font("Arial", Font.PLAIN, 12));
-
-        attContent.add(lblAttendanceText);
-        attContent.add(attendanceProgressBar);
-        attCard.add(attContent, BorderLayout.CENTER);
-        cardsGrid.add(attCard);
-
-        cardsGrid.add(createDashboardCard("CA Eligibility", "Continuous Assessment Requirement: 40%\n\nStatus: ELIGIBLE\nYour CA Average: Evaluated from Database"));
-        cardsGrid.add(createDashboardCard("Grades & GPA", "Current GPA: 3.45\n\nTotal Credits Earned: 72\nAcademic Standing: Good Standing"));
-
-        add(cardsGrid, BorderLayout.CENTER);
+        JPanel grid = new JPanel(new GridLayout(2, 2, 15, 15));
+        grid.setOpaque(false);
+        grid.add(textCard("My Courses", coursesText));
+        JPanel att = new JPanel(new BorderLayout(10, 10));
+        att.setBackground(Color.WHITE);
+        att.setBorder(BorderFactory.createTitledBorder("Attendance"));
+        attendanceBar.setStringPainted(true);
+        attendanceBar.setForeground(new Color(0, 150, 150));
+        att.add(attendanceText, BorderLayout.NORTH);
+        att.add(attendanceBar, BorderLayout.CENTER);
+        grid.add(att);
+        grid.add(textCard("CA Eligibility", eligibilityText));
+        grid.add(textCard("Grades & GPA", gradesText));
+        add(grid, BorderLayout.CENTER);
     }
 
-    private JPanel createDashboardCard(String title, String content) {
-        JPanel card = new JPanel(new BorderLayout(10, 10));
+    private JPanel textCard(String title, JTextArea area) {
+        JPanel card = new JPanel(new BorderLayout());
         card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 225, 235)),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
-
-        JLabel lblCardTitle = new JLabel(title);
-        lblCardTitle.setFont(new Font("Arial", Font.BOLD, 15));
-        card.add(lblCardTitle, BorderLayout.NORTH);
-
-        JTextArea area = new JTextArea(content);
+        card.setBorder(BorderFactory.createTitledBorder(title));
         area.setEditable(false);
-        area.setBackground(Color.WHITE);
+        area.setOpaque(false);
         area.setFont(new Font("Arial", Font.PLAIN, 13));
-        area.setForeground(new Color(60, 70, 85));
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
         card.add(area, BorderLayout.CENTER);
-
         return card;
+    }
+
+    public void refreshData() {
+        int id = student.getStudentId();
+        new SwingWorker<Object[], Void>() {
+            @Override protected Object[] doInBackground() throws Exception {
+                List<String[]> courses = new CourseDAO().getCoursesByStudentId(id);
+                List<AttendanceRecord> attendance = new AttendanceDAO().getAttendanceRecordsForStudent(id);
+                MarksDAO dao = new MarksDAO();
+                return new Object[]{courses, attendance, dao.getMarksByStudentId(id), dao.getGPAByStudentId(id)};
+            }
+            @SuppressWarnings("unchecked")
+            @Override protected void done() {
+                try {
+                    Object[] result = get();
+                    List<String[]> courses = (List<String[]>) result[0];
+                    List<AttendanceRecord> attendance = (List<AttendanceRecord>) result[1];
+                    List<Marks> marks = (List<Marks>) result[2];
+                    GPA gpa = (GPA) result[3];
+                    StringBuilder courseLines = new StringBuilder();
+                    for (String[] c : courses) courseLines.append(c[0]).append(" - ").append(c[1]).append("\n");
+                    coursesText.setText(courses.isEmpty() ? "No enrolled courses" : courseLines.toString());
+                    int sessions = 0, present = 0;
+                    for (AttendanceRecord r : attendance) {
+                        sessions += r.getTotalSessions(); present += r.getAttendedSessions();
+                    }
+                    if (sessions == 0) {
+                        attendanceText.setText("Attendance: No sessions recorded");
+                        attendanceBar.setValue(0);
+                        attendanceBar.setString("--");
+                    } else {
+                        double pct = 100.0 * present / sessions;
+                        attendanceText.setText(String.format("Present: %.2f%% | Absent: %.2f%%", pct, 100 - pct));
+                        attendanceBar.setValue((int) Math.round(pct));
+                        attendanceBar.setString(String.format("%.2f%%", pct));
+                    }
+                    boolean eligible = !marks.isEmpty();
+                    for (Marks m : marks) eligible &= m.viewMyEligibility();
+                    eligibilityText.setText(marks.isEmpty() ? "No CA marks available" :
+                            "CA status: " + (eligible ? "ELIGIBLE" : "NOT ELIGIBLE") +
+                                    "\nBased on the existing Marks.viewMyEligibility() rule");
+                    gradesText.setText(gpa == null ? "GPA: No records available" :
+                            String.format("SGPA: %.2f\nCGPA: %.2f\nSemester: %d", gpa.getSgpa(), gpa.getCgpa(), gpa.getSemester()));
+                } catch (Exception ex) {
+                    coursesText.setText("Could not load database data");
+                    eligibilityText.setText("Could not load database data");
+                    gradesText.setText("Could not load database data");
+                    attendanceText.setText("Could not load attendance");
+                    ex.printStackTrace();
+                }
+            }
+        }.execute();
     }
 }
