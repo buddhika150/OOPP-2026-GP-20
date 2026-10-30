@@ -1,4 +1,3 @@
-
 package com.ftms.view.admin;
 
 import com.ftms.view.LoginFrame;
@@ -173,9 +172,10 @@ public class AdminDashboard extends JFrame {
 
         // MEDIUM-SIZE CARDS
 
-        JPanel cards = new JPanel(
-                new GridLayout(2, 2, 18, 18)
-        );
+        JPanel cards = new JPanel
+                (
+                        new GridLayout(2, 2, 18, 18)
+                );
         cards.setOpaque(false);
 
         JButton usersCard = createCard(
@@ -220,50 +220,34 @@ public class AdminDashboard extends JFrame {
         content.add(body, BorderLayout.CENTER);
         root.add(content, BorderLayout.CENTER);
 
-        //  BUTTON ACTIONS
+        // BUTTON ACTIONS - open the selected page before closing dashboard
+        usersBtn.addActionListener(e -> openPage(new UserManagement()));
 
-        usersBtn.addActionListener(e -> {
-            dispose();
-            new UserManagement();
-        });
+        noticesBtn.addActionListener(e -> openPage(new NoticeManagement()));
+        timetableBtn.addActionListener(e -> openPage(new TimetableManagement()));
 
+        usersCard.addActionListener(e -> openPage(new UserManagement()));
         coursesBtn.addActionListener(e -> {
             new CourseManagement();
-            dispose();
-        });
 
-        noticesBtn.addActionListener(
-                e -> showPage("Manage Notices")
-        );
-
-        timetableBtn.addActionListener(
-                e -> showPage("Timetable")
-        );
-
-        usersCard.addActionListener(e -> {
-            dispose();
-            new UserManagement();
         });
 
         coursesCard.addActionListener(e -> {
             new CourseManagement();
-            dispose();
+
         });
+        noticesCard.addActionListener(e -> openPage(new NoticeManagement()));
+        timetableCard.addActionListener(e -> openPage(new TimetableManagement()));
 
-        noticesCard.addActionListener(
-                e -> showPage("Manage Notices")
-        );
-
-        timetableCard.addActionListener(
-                e -> showPage("Timetable")
-        );
-
-        logout.addActionListener(e -> {
-            dispose();
-            new LoginFrame();
-        });
+        logout.addActionListener(e -> openPage(new LoginFrame()));
 
         setVisible(true);
+    }
+
+    // Show the next window, then close the current dashboard.
+    private void openPage(JFrame page) {
+        page.setVisible(true);
+        dispose();
     }
 
     // SIDEBAR BUTTON

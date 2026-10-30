@@ -2,6 +2,9 @@
 package com.ftms.view;
 
 import com.ftms.dao.LoginDAO;
+import com.ftms.view.admin.AdminDashboard;
+import com.ftms.view.student.StudentDashboard;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -34,9 +37,13 @@ public class LoginFrame extends JFrame {
 
         // LEFT SIDE
         JPanel leftPanel = new JPanel();
-        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.setLayout(
+                new BoxLayout(leftPanel, BoxLayout.Y_AXIS)
+        );
         leftPanel.setBackground(navy);
-        leftPanel.setBorder(new EmptyBorder(110, 45, 50, 45));
+        leftPanel.setBorder(
+                new EmptyBorder(110, 45, 50, 45)
+        );
 
         JLabel logo = new JLabel("FTMS");
         logo.setFont(new Font("Arial", Font.BOLD, 48));
@@ -44,7 +51,8 @@ public class LoginFrame extends JFrame {
         logo.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel systemName = new JLabel(
-                "<html>FACULTY OF TECHNOLOGY<br>MANAGEMENT SYSTEM</html>"
+                "<html>FACULTY OF TECHNOLOGY<br>" +
+                        "MANAGEMENT SYSTEM</html>"
         );
         systemName.setFont(new Font("Arial", Font.BOLD, 19));
         systemName.setForeground(Color.WHITE);
@@ -78,7 +86,9 @@ public class LoginFrame extends JFrame {
         welcome.setForeground(navy);
         welcome.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel subtitle = new JLabel("Sign in to your FTMS account");
+        JLabel subtitle = new JLabel(
+                "Sign in to your FTMS account"
+        );
         subtitle.setFont(new Font("Arial", Font.PLAIN, 14));
         subtitle.setForeground(Color.GRAY);
         subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -87,16 +97,24 @@ public class LoginFrame extends JFrame {
         usernameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         usernameField = new JTextField();
-        usernameField.setMaximumSize(new Dimension(310, 40));
-        usernameField.setFont(new Font("Arial", Font.PLAIN, 15));
+        usernameField.setMaximumSize(
+                new Dimension(310, 40)
+        );
+        usernameField.setFont(
+                new Font("Arial", Font.PLAIN, 15)
+        );
         usernameField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel passwordLabel = new JLabel("Password");
         passwordLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         passwordField = new JPasswordField();
-        passwordField.setMaximumSize(new Dimension(310, 40));
-        passwordField.setFont(new Font("Arial", Font.PLAIN, 15));
+        passwordField.setMaximumSize(
+                new Dimension(310, 40)
+        );
+        passwordField.setFont(
+                new Font("Arial", Font.PLAIN, 15)
+        );
         passwordField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         char originalEcho = passwordField.getEchoChar();
@@ -118,7 +136,9 @@ public class LoginFrame extends JFrame {
         loginButton.setForeground(Color.WHITE);
         loginButton.setFont(new Font("Arial", Font.BOLD, 16));
         loginButton.setFocusPainted(false);
-        loginButton.setMaximumSize(new Dimension(310, 45));
+        loginButton.setMaximumSize(
+                new Dimension(310, 45)
+        );
         loginButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         loginButton.setCursor(
                 new Cursor(Cursor.HAND_CURSOR)
@@ -151,24 +171,56 @@ public class LoginFrame extends JFrame {
         loginButton.addActionListener(e -> {
 
             String username = usernameField.getText().trim();
-            String password = new String(passwordField.getPassword());
+            String password = new String(
+                    passwordField.getPassword()
+            );
 
             if (username.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter username and password.");
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Please enter username and password."
+                );
                 return;
             }
 
             LoginDAO dao = new LoginDAO();
             String role = dao.login(username, password);
 
-            if (role != null) {
-                JOptionPane.showMessageDialog(this,
-                        "Login Successful! Role: " + role);
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Invalid Username or Password");
+            if (role == null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid Username or Password"
+                );
+                return;
             }
+
+            // Open dashboard according to role
+            switch (role.trim().toLowerCase()) {
+
+                case "admin":
+                    AdminDashboard adminDashboard =
+                            new AdminDashboard();
+
+                    adminDashboard.setVisible(true);
+                    dispose();
+                    break;
+
+                case "student":
+                    StudentDashboard studentDashboard =
+                            new StudentDashboard();
+
+                    studentDashboard.setVisible(true);
+                    dispose();
+                    break;
+
+                default:
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Dashboard is not available for role: " + role
+                    );
+                    break;
+            }
+
         });
 
         getRootPane().setDefaultButton(loginButton);
@@ -177,6 +229,6 @@ public class LoginFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginFrame());
+        SwingUtilities.invokeLater(LoginFrame::new);
     }
 }
