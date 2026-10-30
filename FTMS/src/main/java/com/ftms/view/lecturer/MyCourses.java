@@ -18,11 +18,11 @@ public class MyCourses extends JFrame{
 
     JPanel main_panel = new JPanel(new BorderLayout(10,10));
 
-    private int lecturerId;
+    private int lectureId;
 
     MyCourses(int lecturerId){
 
-        this.lecturerId = lecturerId;
+        this.lectureId = lecturerId;
 
         windwo();
         Heading();
@@ -115,7 +115,7 @@ public class MyCourses extends JFrame{
             Connection con = DatabaseConnection.getConnection();
             PreparedStatement pst = con.prepareStatement(sql);
 
-            pst.setInt(1, lecturerId);
+            pst.setInt(1, lectureId);
 
             ResultSet rs = pst.executeQuery();
 
@@ -143,25 +143,27 @@ public class MyCourses extends JFrame{
 
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //sidebar
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private  void CreaterSidebar() {
+
+    private  void CreaterSidebar(){
 
         JPanel sidebar = new JPanel();
-        Color sidebar_color = new Color(16, 45, 79);
+        Color sidebar_color = new Color(16,45,79);
 
         sidebar.setBackground(sidebar_color);
 
-        this.add(sidebar, BorderLayout.WEST);
+        this.add(sidebar , BorderLayout.WEST);
 
 
         // FTMS text
 
         JLabel sidebar_headr_text = new JLabel("FTMS");
         sidebar_headr_text.setForeground(Color.WHITE);
-        sidebar_headr_text.setFont(new Font("Arial", Font.BOLD, 40));
+        sidebar_headr_text.setFont(new Font("Arial",Font.BOLD,40));
         sidebar.add(sidebar_headr_text);
 
 
@@ -170,28 +172,29 @@ public class MyCourses extends JFrame{
 
         JLabel sidebar_dear_text_2 = new JLabel("FACULTY OF TECHNOLOGY");
         sidebar_dear_text_2.setForeground(Color.WHITE);
-        sidebar_dear_text_2.setFont(new Font("Arial", Font.BOLD, 15));
+        sidebar_dear_text_2.setFont(new Font("Arial",Font.BOLD,15));
         sidebar.add(sidebar_dear_text_2);
 
 
         JLabel sidebar_dear_text_3 = new JLabel("MANAGEMENT SYSTEM");
         sidebar_dear_text_3.setForeground(Color.WHITE);
-        sidebar_dear_text_3.setFont(new Font("Arial", Font.BOLD, 15));
+        sidebar_dear_text_3.setFont(new Font("Arial",Font.BOLD,15));
         sidebar.add(sidebar_dear_text_3);
+
 
 
         //side bar button common variable
 
-        Dimension sidebar_size = new Dimension(250, 500);
+        Dimension sidebar_size = new Dimension(250,500);
         sidebar.setPreferredSize(sidebar_size);
 
 
-        Color sidebar_button_color = new Color(0, 143, 156);
-        Dimension sidebar_button_size = new Dimension(215, 40);
+        Color sidebar_button_color = new Color(0,143,156);
+        Dimension sidebar_button_size = new Dimension(215,40);
 
         //Dashbord
         JButton dashbord_button = new JButton("Dashbord");
-        dashbord_button.setFont(new Font("Arial", Font.BOLD, 15));
+        dashbord_button.setFont(new Font("Arial",Font.BOLD,15));
 
         sidebar.add(dashbord_button);
 
@@ -199,6 +202,10 @@ public class MyCourses extends JFrame{
         dashbord_button.setForeground(Color.WHITE);
 
         dashbord_button.setPreferredSize(sidebar_button_size);
+
+        dashbord_button.addActionListener( e -> {
+            new LecturerDashboard(lectureId);
+        });
 
 
         URL Dash_path = getClass().getResource("/images/house.png");
@@ -209,33 +216,34 @@ public class MyCourses extends JFrame{
         dashbord_button.setHorizontalAlignment(SwingConstants.LEFT);
         dashbord_button.setIconTextGap(15);
 
-        dashbord_button.addActionListener(e -> {
-            new LecturerDashboard(lecturerId);
-
-            //this.setVisible(false);
-        });
 
 
-        //Mange course
 
-        JButton manage_course_button = new JButton("Manage Course");
-        sidebar.add(manage_course_button);
 
-        manage_course_button.setPreferredSize(sidebar_button_size);
-        manage_course_button.setBackground(sidebar_button_color);
-        manage_course_button.setForeground(Color.WHITE);
+        //my course
+
+        JButton my_course_button = new JButton("My Course");
+        sidebar.add(my_course_button);
+
+        my_course_button.setPreferredSize(sidebar_button_size);
+        my_course_button.setBackground(sidebar_button_color);
+        my_course_button.setForeground(Color.WHITE);
 
         URL manage_path = getClass().getResource("/images/book.png");
         ImageIcon manage_icon = new ImageIcon(manage_path);
-        manage_course_button.setIcon(manage_icon);
+        my_course_button.setIcon(manage_icon);
 
-        manage_course_button.setHorizontalAlignment(SwingConstants.LEFT);
-        manage_course_button.setIconTextGap(15);
+        my_course_button.setHorizontalAlignment(SwingConstants.LEFT);
+        my_course_button.setIconTextGap(15);
+
+        my_course_button.addActionListener(e -> {
+            new MyCourses(lectureId);
+        });
 
 
         //course material
 
-        JButton course_material_button = new JButton("Course Materials");
+        JButton course_material_button = new JButton("Upload Material");
         sidebar.add(course_material_button);
 
         course_material_button.setPreferredSize(sidebar_button_size);
@@ -248,6 +256,80 @@ public class MyCourses extends JFrame{
 
         course_material_button.setHorizontalAlignment(SwingConstants.LEFT);
         course_material_button.setIconTextGap(15);
+
+        course_material_button.addActionListener(e -> {
+            new CourseMaterials(lectureId);
+        });
+
+
+        //Upload marks
+
+        JButton upload_marks_button = new JButton("Upload Marks");
+        sidebar.add(upload_marks_button);
+
+        upload_marks_button.setPreferredSize(sidebar_button_size);
+        upload_marks_button.setBackground(sidebar_button_color);
+        upload_marks_button.setForeground(Color.WHITE);
+
+        URL upload_mark_path = getClass().getResource("/images/upload_marks.png");
+        ImageIcon uploadmark_icon = new ImageIcon(upload_mark_path);
+        upload_marks_button.setIcon(uploadmark_icon);
+
+        upload_marks_button.setHorizontalAlignment(SwingConstants.LEFT);
+        upload_marks_button.setIconTextGap(15);
+
+        upload_marks_button.addActionListener(e -> {
+            new UploadMarks(lectureId);
+
+
+        });
+
+
+        //Attendance  summary
+
+        JButton attendance_button = new JButton("Attendance Summary");
+        sidebar.add(attendance_button);
+
+        attendance_button.setPreferredSize(sidebar_button_size);
+        attendance_button.setBackground(sidebar_button_color);
+        attendance_button.setForeground(Color.WHITE);
+
+        URL attendance_image_path = getClass().getResource("/images/attendance_summary.png");
+        ImageIcon attendance_icon = new ImageIcon(attendance_image_path);
+        attendance_button.setIcon(attendance_icon);
+
+        attendance_button.setHorizontalAlignment(SwingConstants.LEFT);
+        attendance_button.setIconTextGap(15);
+
+        attendance_button.addActionListener(e -> {
+            new LecturerAttendanceSummary(lectureId);
+
+
+        });
+
+
+
+        //Student Eligibility
+
+        JButton eligibility_button = new JButton("Attendance Summary");
+        sidebar.add(attendance_button);
+
+        eligibility_button.setPreferredSize(sidebar_button_size);
+        eligibility_button.setBackground(sidebar_button_color);
+        eligibility_button.setForeground(Color.WHITE);
+
+        URL eligibility_image_path = getClass().getResource("/images/student_eligibility.png");
+        ImageIcon eligibility_icon = new ImageIcon(eligibility_image_path);
+        eligibility_button.setIcon(eligibility_icon);
+
+        eligibility_button.setHorizontalAlignment(SwingConstants.LEFT);
+        eligibility_button.setIconTextGap(15);
+
+        eligibility_button.addActionListener(e -> {
+
+
+
+        });
 
         //log out
 
@@ -267,5 +349,9 @@ public class MyCourses extends JFrame{
         logout_button.setHorizontalAlignment(SwingConstants.LEFT);
         logout_button.setIconTextGap(15);
 
+
     }
+
+
+
 }

@@ -284,6 +284,10 @@ private  void CreaterSidebar(){
 
         dashbord_button.setPreferredSize(sidebar_button_size);
 
+        dashbord_button.addActionListener( e -> {
+            new LecturerDashboard(lectureId);
+        });
+
 
         URL Dash_path = getClass().getResource("/images/house.png");
         ImageIcon dashbord_icon = new ImageIcon(Dash_path);
@@ -297,26 +301,30 @@ private  void CreaterSidebar(){
 
 
 
-        //Mange course
+        //my course
 
-        JButton manage_course_button = new JButton("Manage Course");
-        sidebar.add(manage_course_button);
+        JButton my_course_button = new JButton("My Course");
+        sidebar.add(my_course_button);
 
-        manage_course_button.setPreferredSize(sidebar_button_size);
-        manage_course_button.setBackground(sidebar_button_color);
-        manage_course_button.setForeground(Color.WHITE);
+        my_course_button.setPreferredSize(sidebar_button_size);
+        my_course_button.setBackground(sidebar_button_color);
+        my_course_button.setForeground(Color.WHITE);
 
         URL manage_path = getClass().getResource("/images/book.png");
         ImageIcon manage_icon = new ImageIcon(manage_path);
-        manage_course_button.setIcon(manage_icon);
+        my_course_button.setIcon(manage_icon);
 
-        manage_course_button.setHorizontalAlignment(SwingConstants.LEFT);
-        manage_course_button.setIconTextGap(15);
+        my_course_button.setHorizontalAlignment(SwingConstants.LEFT);
+        my_course_button.setIconTextGap(15);
+
+        my_course_button.addActionListener(e -> {
+            new MyCourses(lectureId);
+        });
 
 
         //course material
 
-        JButton course_material_button = new JButton("Course Materials");
+        JButton course_material_button = new JButton("Upload Material");
         sidebar.add(course_material_button);
 
         course_material_button.setPreferredSize(sidebar_button_size);
@@ -329,6 +337,80 @@ private  void CreaterSidebar(){
 
          course_material_button.setHorizontalAlignment(SwingConstants.LEFT);
          course_material_button.setIconTextGap(15);
+
+         course_material_button.addActionListener(e -> {
+             new CourseMaterials(lectureId);
+         });
+
+
+    //Upload marks
+
+    JButton upload_marks_button = new JButton("Upload Marks");
+    sidebar.add(upload_marks_button);
+
+    upload_marks_button.setPreferredSize(sidebar_button_size);
+    upload_marks_button.setBackground(sidebar_button_color);
+    upload_marks_button.setForeground(Color.WHITE);
+
+    URL upload_mark_path = getClass().getResource("/images/upload_marks.png");
+    ImageIcon uploadmark_icon = new ImageIcon(upload_mark_path);
+    upload_marks_button.setIcon(uploadmark_icon);
+
+    upload_marks_button.setHorizontalAlignment(SwingConstants.LEFT);
+    upload_marks_button.setIconTextGap(15);
+
+    upload_marks_button.addActionListener(e -> {
+        new UploadMarks(lectureId);
+
+
+    });
+
+
+    //Attendance  summary
+
+    JButton attendance_button = new JButton("Attendance Summary");
+    sidebar.add(attendance_button);
+
+    attendance_button.setPreferredSize(sidebar_button_size);
+    attendance_button.setBackground(sidebar_button_color);
+    attendance_button.setForeground(Color.WHITE);
+
+    URL attendance_image_path = getClass().getResource("/images/attendance_summary.png");
+    ImageIcon attendance_icon = new ImageIcon(attendance_image_path);
+    attendance_button.setIcon(attendance_icon);
+
+    attendance_button.setHorizontalAlignment(SwingConstants.LEFT);
+    attendance_button.setIconTextGap(15);
+
+    attendance_button.addActionListener(e -> {
+        new LecturerAttendanceSummary(lectureId);
+
+
+    });
+
+
+
+    //Student Eligibility
+
+    JButton eligibility_button = new JButton("Attendance Summary");
+    sidebar.add(attendance_button);
+
+    eligibility_button.setPreferredSize(sidebar_button_size);
+    eligibility_button.setBackground(sidebar_button_color);
+    eligibility_button.setForeground(Color.WHITE);
+
+    URL eligibility_image_path = getClass().getResource("/images/student_eligibility.png");
+    ImageIcon eligibility_icon = new ImageIcon(eligibility_image_path);
+    eligibility_button.setIcon(eligibility_icon);
+
+    eligibility_button.setHorizontalAlignment(SwingConstants.LEFT);
+    eligibility_button.setIconTextGap(15);
+
+    eligibility_button.addActionListener(e -> {
+
+
+
+    });
 
         //log out
 
@@ -347,11 +429,6 @@ private  void CreaterSidebar(){
 
         logout_button.setHorizontalAlignment(SwingConstants.LEFT);
         logout_button.setIconTextGap(15);
-
-
-
-
-
 
 
     }
