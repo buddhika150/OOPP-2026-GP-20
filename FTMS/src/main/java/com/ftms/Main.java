@@ -1,3 +1,7 @@
-package FTMS\src\main\java\com\ftms;
+package com.ftms;
 
-public class Sample {}
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("FTMS Started");
+    }
+}
