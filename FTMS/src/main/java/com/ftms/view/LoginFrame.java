@@ -2,6 +2,7 @@
 package com.ftms.view;
 
 import com.ftms.dao.LoginDAO;
+import com.ftms.view.admin.AdminDashboard;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -163,11 +164,29 @@ public class LoginFrame extends JFrame {
             String role = dao.login(username, password);
 
             if (role != null) {
-                JOptionPane.showMessageDialog(this,
-                        "Login Successful! Role: " + role);
+
+                if (role.trim().equalsIgnoreCase("ADMIN")) {
+
+                    // Open Admin Dashboard directly
+                    new AdminDashboard();
+                    dispose();
+
+                } else {
+
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Dashboard for " + role + " is not connected yet."
+                    );
+                }
+
             } else {
-                JOptionPane.showMessageDialog(this,
-                        "Invalid Username or Password");
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid Username or Password",
+                        "Login Failed",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         });
 
