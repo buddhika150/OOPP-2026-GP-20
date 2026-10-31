@@ -1,3 +1,3 @@
-package FTMS\src\main\java\com\ftms\dao;
+package com.ftms.dao;
 
 public class Sample {}

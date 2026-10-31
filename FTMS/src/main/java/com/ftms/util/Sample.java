@@ -1,3 +1,3 @@
-package FTMS\src\main\java\com\ftms\util;
+package com.ftms.util;
 
 public class Sample {}

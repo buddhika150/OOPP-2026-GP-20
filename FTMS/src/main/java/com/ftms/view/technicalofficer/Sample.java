@@ -1,3 +1,3 @@
-package FTMS\src\main\java\com\ftms\view\technicalofficer;
+package com.ftms.view.technicalofficer;
 
 public class Sample {}

@@ -1,3 +1,3 @@
-package FTMS\src\main\java\com\ftms\view\lecturer;
+package com.ftms.view.lecturer;
 
 public class Sample {}
