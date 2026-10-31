@@ -1,6 +1,7 @@
 package com.ftms.view.technicalofficer;
 
 import com.ftms.dao.AttendanceDAO;
+import com.ftms.database.DatabaseConnection;
 import com.ftms.model.Attendance;
 
 import javax.swing.*;
@@ -10,6 +11,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,8 +142,8 @@ public class AttendanceSummaryPanel extends JPanel {
 
         kpiGrid.add(createKpiCard("Student-Course Entries", lblTotalGroups, NAVY_DARK));
         kpiGrid.add(createKpiCard("Total Filtered Sessions", lblTotalSessions, NAVY_DARK));
-        kpiGrid.add(createKpiCard("Sessions Attended", lblAttendedSessions, TEAL_ACCENT));
-        kpiGrid.add(createKpiCard("Overall Attendance %", lblOverallPercentage, GREEN_OK));
+        kpiGrid.add(createKpiCard("Sessions Actually Attended", lblAttendedSessions, TEAL_ACCENT));
+        kpiGrid.add(createKpiCard("Overall Actual Attendance %", lblOverallPercentage, GREEN_OK));
 
         topContainer.add(kpiGrid, BorderLayout.CENTER);
         add(topContainer, BorderLayout.NORTH);
@@ -149,7 +156,7 @@ public class AttendanceSummaryPanel extends JPanel {
                 new EmptyBorder(16, 22, 18, 22)
         ));
 
-        JLabel lblTableHeading = new JLabel("Student & Batch Course Attendance Breakdown (80% Eligibility Threshold)");
+        JLabel lblTableHeading = new JLabel("Course-wise Theory / Practical / Filtered Eligibility (Approved Medical Counted)");
         lblTableHeading.setFont(new Font("Segoe UI", Font.BOLD, 15));
         lblTableHeading.setForeground(NAVY_DARK);
         tableCard.add(lblTableHeading, BorderLayout.NORTH);
@@ -157,13 +164,15 @@ public class AttendanceSummaryPanel extends JPanel {
         String[] columns = {
                 "Student ID",
                 "Course Code",
-                "Theory (Att/Tot)",
-                "Theory %",
-                "Practical (Att/Tot)",
-                "Practical %",
-                "Filtered (Att/Tot)",
-                "Filtered %",
-                "Eligibility (>= 80%)"
+                "Theory (Present+Medical/Total)",
+                "Theory Adjusted %",
+                "Theory Eligibility",
+                "Practical (Present+Medical/Total)",
+                "Practical Adjusted %",
+                "Practical Eligibility",
+                "Filtered (Present+Medical/Total)",
+                "Filtered Adjusted %",
+                "Filtered Eligibility"
         };
 
         tableModel = new DefaultTableModel(columns, 0) {
@@ -247,6 +256,10 @@ public class AttendanceSummaryPanel extends JPanel {
             rawRecords = attendanceDAO.getAllAttendance();
         }
 
+        // Approved medicals cover ABSENT sessions within the medical date range.
+        // Actual attendance remains unchanged; only eligibility is adjusted.
+        Set<Integer> approvedMedicalAttendanceIds = loadApprovedMedicalAttendanceIds();
+
         // Group records by (Student_ID + Course_code)
         Map<String, SummaryStats> statsMap = new LinkedHashMap<>();
 
@@ -266,16 +279,17 @@ public class AttendanceSummaryPanel extends JPanel {
             SummaryStats stats = statsMap.computeIfAbsent(key,
                     k -> new SummaryStats(a.getStudentId(), a.getCourseCode()));
 
+            boolean medicalCredit = !a.isPresent()
+                    && approvedMedicalAttendanceIds.contains(a.getAttendanceId());
+
             if (Attendance.TYPE_THEORY.equalsIgnoreCase(a.getType())) {
                 stats.theoryTotal++;
-                if (a.isPresent()) {
-                    stats.theoryPresent++;
-                }
+                if (a.isPresent()) stats.theoryPresent++;
+                if (medicalCredit) stats.theoryMedicalCredits++;
             } else if (Attendance.TYPE_PRACTICAL.equalsIgnoreCase(a.getType())) {
                 stats.practicalTotal++;
-                if (a.isPresent()) {
-                    stats.practicalPresent++;
-                }
+                if (a.isPresent()) stats.practicalPresent++;
+                if (medicalCredit) stats.practicalMedicalCredits++;
             }
         }
 
@@ -284,16 +298,20 @@ public class AttendanceSummaryPanel extends JPanel {
         for (SummaryStats s : statsMap.values()) {
             int filteredPresent;
             int filteredTotal;
+            int medicalCredits;
 
             if (Attendance.TYPE_THEORY.equalsIgnoreCase(typeFilter)) {
                 filteredPresent = s.theoryPresent;
                 filteredTotal = s.theoryTotal;
+                medicalCredits = s.theoryMedicalCredits;
             } else if (Attendance.TYPE_PRACTICAL.equalsIgnoreCase(typeFilter)) {
                 filteredPresent = s.practicalPresent;
                 filteredTotal = s.practicalTotal;
+                medicalCredits = s.practicalMedicalCredits;
             } else {
                 filteredPresent = s.theoryPresent + s.practicalPresent;
                 filteredTotal = s.theoryTotal + s.practicalTotal;
+                medicalCredits = s.theoryMedicalCredits + s.practicalMedicalCredits;
             }
 
             if (filteredTotal == 0) {
@@ -303,24 +321,34 @@ public class AttendanceSummaryPanel extends JPanel {
             grandTotalFiltered += filteredTotal;
             grandAttendedFiltered += filteredPresent;
 
-            double theoryPct = s.theoryTotal > 0
-                    ? Attendance.calculateAttendancePercentage(s.theoryPresent, s.theoryTotal) : 0.0;
-            double practicalPct = s.practicalTotal > 0
-                    ? Attendance.calculateAttendancePercentage(s.practicalPresent, s.practicalTotal) : 0.0;
-            double filteredPct = Attendance.calculateAttendancePercentage(filteredPresent, filteredTotal);
+            int theoryEffective = s.theoryPresent + s.theoryMedicalCredits;
+            int practicalEffective = s.practicalPresent + s.practicalMedicalCredits;
+            int filteredEffective = filteredPresent + medicalCredits;
 
-            String eligibility = filteredPct >= 80.0 ? "ELIGIBLE" : "NOT ELIGIBLE";
+            double theoryPct = s.theoryTotal > 0
+                    ? Attendance.calculateAttendancePercentage(theoryEffective, s.theoryTotal) : 0.0;
+            double practicalPct = s.practicalTotal > 0
+                    ? Attendance.calculateAttendancePercentage(practicalEffective, s.practicalTotal) : 0.0;
+            double filteredPct = Attendance.calculateAttendancePercentage(filteredEffective, filteredTotal);
+
+            String theoryEligibility = s.theoryTotal == 0 ? "N/A"
+                    : (theoryPct >= 80.0 ? "ELIGIBLE" : "NOT ELIGIBLE");
+            String practicalEligibility = s.practicalTotal == 0 ? "N/A"
+                    : (practicalPct >= 80.0 ? "ELIGIBLE" : "NOT ELIGIBLE");
+            String filteredEligibility = filteredPct >= 80.0 ? "ELIGIBLE" : "NOT ELIGIBLE";
 
             tableModel.addRow(new Object[]{
                     s.studentId,
                     s.courseCode,
-                    s.theoryPresent + " / " + s.theoryTotal,
+                    theoryEffective + " / " + s.theoryTotal,
                     String.format("%.1f%%", theoryPct),
-                    s.practicalPresent + " / " + s.practicalTotal,
+                    theoryEligibility,
+                    practicalEffective + " / " + s.practicalTotal,
                     String.format("%.1f%%", practicalPct),
-                    filteredPresent + " / " + filteredTotal,
+                    practicalEligibility,
+                    filteredEffective + " / " + filteredTotal,
                     String.format("%.1f%%", filteredPct),
-                    eligibility
+                    filteredEligibility
             });
         }
 
@@ -332,6 +360,33 @@ public class AttendanceSummaryPanel extends JPanel {
         lblAttendedSessions.setText(String.valueOf(grandAttendedFiltered));
         lblOverallPercentage.setText(String.format("%.1f%%", overallPct));
         lblOverallPercentage.setForeground(overallPct >= 80.0 ? GREEN_OK : RED_WARN);
+    }
+
+    /**
+     * Find absent attendance records covered by APPROVED medical date ranges.
+     * One attendance ID is credited at most once, even for overlapping medicals.
+     */
+    private Set<Integer> loadApprovedMedicalAttendanceIds() {
+        Set<Integer> ids = new HashSet<>();
+        String sql = "SELECT DISTINCT a.Attendance_ID " +
+                "FROM attendance a " +
+                "JOIN medical m ON m.Student_ID = a.Student_ID " +
+                "AND a.Session_date BETWEEN m.Start_date AND m.End_date " +
+                "WHERE a.Is_Present = 0 AND UPPER(TRIM(m.Approval_status)) = 'APPROVED'";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ids.add(rs.getInt("Attendance_ID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Could not load approved medicals: " + e.getMessage(),
+                    "Medical Data Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return ids;
     }
 
     private JButton createButton(String text, Color bg) {
@@ -366,26 +421,29 @@ public class AttendanceSummaryPanel extends JPanel {
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 
-        for (int i = 0; i < table.getColumnCount() - 1; i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            if (i == 4 || i == 7 || i == 10) {
+                table.getColumnModel().getColumn(i).setCellRenderer(new DefaultTableCellRenderer() {
+                    @Override
+                    public Component getTableCellRendererComponent(JTable tbl, Object value,
+                                                                   boolean isSelected, boolean hasFocus, int row, int col) {
+                        JLabel lbl = (JLabel) super.getTableCellRendererComponent(
+                                tbl, value, isSelected, hasFocus, row, col);
+                        lbl.setHorizontalAlignment(SwingConstants.CENTER);
+                        lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                        String status = value == null ? "" : value.toString();
+                        if (!isSelected) {
+                            lbl.setForeground("ELIGIBLE".equals(status) ? GREEN_OK
+                                    : "NOT ELIGIBLE".equals(status) ? RED_WARN : TEXT_MUTED);
+                        }
+                        return lbl;
+                    }
+                });
+            } else {
+                table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+            }
         }
 
-        table.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected,
-                                                           boolean hasFocus, int row, int col) {
-                JLabel lbl = (JLabel) super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, col);
-                lbl.setHorizontalAlignment(SwingConstants.CENTER);
-                lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
-                String text = value != null ? value.toString() : "";
-                if ("ELIGIBLE".equalsIgnoreCase(text)) {
-                    lbl.setForeground(GREEN_OK);
-                } else {
-                    lbl.setForeground(RED_WARN);
-                }
-                return lbl;
-            }
-        });
     }
 
     private static class SummaryStats {
@@ -393,8 +451,10 @@ public class AttendanceSummaryPanel extends JPanel {
         final String courseCode;
         int theoryPresent;
         int theoryTotal;
+        int theoryMedicalCredits;
         int practicalPresent;
         int practicalTotal;
+        int practicalMedicalCredits;
 
         SummaryStats(int studentId, String courseCode) {
             this.studentId = studentId;

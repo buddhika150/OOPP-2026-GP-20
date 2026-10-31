@@ -10,29 +10,73 @@ import java.util.List;
 public class AttendanceDAO {
 
     // 1. Insert new attendance record (AUTO_INCREMENT)
+
     public boolean addAttendance(Attendance a) {
-        String sql = "INSERT INTO attendance (Student_ID, Course_code, Session_date, Type, Is_Present) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        String checkSql =
+                "SELECT COUNT(*) FROM attendance " +
+                        "WHERE Student_ID = ? AND Course_code = ? " +
+                        "AND Session_date = ? AND Type = ?";
 
-            ps.setInt(1, a.getStudentId());
-            ps.setString(2, a.getCourseCode());
-            ps.setDate(3, a.getSessionDate() != null ? Date.valueOf(a.getSessionDate()) : null);
-            ps.setString(4, a.getType());
-            ps.setInt(5, a.isPresent() ? 1 : 0);
+        String insertSql =
+                "INSERT INTO attendance " +
+                        "(Student_ID, Course_code, Session_date, Type, Is_Present) " +
+                        "VALUES (?, ?, ?, ?, ?)";
 
-            if (ps.executeUpdate() > 0) {
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) {
-                        a.setAttendanceId(keys.getInt(1));
+        if (a.getSessionDate() == null) {
+            System.out.println("Session date is required.");
+            return false;
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+
+            // Check duplicate attendance
+            try (PreparedStatement check =
+                         conn.prepareStatement(checkSql)) {
+
+                check.setInt(1, a.getStudentId());
+                check.setString(2, a.getCourseCode());
+                check.setDate(3, Date.valueOf(a.getSessionDate()));
+                check.setString(4, a.getType());
+
+                try (ResultSet rs = check.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        System.out.println(
+                                "Attendance already recorded for this session."
+                        );
+                        return false;
                     }
                 }
-                return true;
             }
+
+            // Save attendance
+            try (PreparedStatement ps =
+                         conn.prepareStatement(
+                                 insertSql,
+                                 Statement.RETURN_GENERATED_KEYS)) {
+
+                ps.setInt(1, a.getStudentId());
+                ps.setString(2, a.getCourseCode());
+                ps.setDate(3, Date.valueOf(a.getSessionDate()));
+                ps.setString(4, a.getType());
+                ps.setInt(5, a.isPresent() ? 1 : 0);
+
+                if (ps.executeUpdate() > 0) {
+
+                    try (ResultSet keys = ps.getGeneratedKeys()) {
+                        if (keys.next()) {
+                            a.setAttendanceId(keys.getInt(1));
+                        }
+                    }
+
+                    return true;
+                }
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return false;
     }
 
