@@ -1,10 +1,12 @@
 package com.ftms.view.technicalofficer;
 
+import com.ftms.dao.AttendanceDAO;
 import com.ftms.model.TechnicalOfficer;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -12,14 +14,15 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Main Swing Dashboard for Member 3 (Technical Officer).
  * Matches the uploaded FTMS UI theme and provides navigation across
- * Dashboard, Attendance, Attendance Summary, Medical Records, Medical Approval,
- * Notices, and Timetable.
+ * Dashboard, My Profile, Attendance, Attendance Summary, Medical Records,
+ * Medical Approval, Notices, and Timetable.
  */
 public class TechnicalOfficerDashboard extends JFrame {
 
@@ -40,6 +43,7 @@ public class TechnicalOfficerDashboard extends JFrame {
     private static final Color TEXT_MUTED = new Color(115, 128, 142);
 
     private static final String CARD_DASHBOARD = "DASHBOARD";
+    private static final String CARD_PROFILE = "PROFILE";
     private static final String CARD_ATTENDANCE = "ATTENDANCE";
     private static final String CARD_SUMMARY = "SUMMARY";
     private static final String CARD_MEDICAL = "MEDICAL";
@@ -47,11 +51,28 @@ public class TechnicalOfficerDashboard extends JFrame {
     private static final String CARD_NOTICES = "NOTICES";
     private static final String CARD_TIMETABLE = "TIMETABLE";
 
-    private final TechnicalOfficer currentOfficer;
+    private TechnicalOfficer currentOfficer;
+    private final AttendanceDAO profileDAO;
 
     private CardLayout cardLayout;
     private JPanel contentCardsPanel;
     private JLabel lblPageTitle;
+    private JLabel lblRoleBadge;
+    private JLabel lblWelcomeTitle;
+
+    // My Profile fields
+    private JLabel lblProfileHeaderName;
+    private JLabel lblProfileHeaderSub;
+    private JLabel lblProfileAvatar;
+    private JTextField txtProfileToId;
+    private JTextField txtProfileUsername;
+    private JTextField txtProfileRole;
+    private JTextField txtProfileDepartment;
+    private JTextField txtProfileFname;
+    private JTextField txtProfileLname;
+    private JTextField txtProfileEmail;
+    private JTextField txtProfilePhone;
+    private JTextField txtProfilePicPath;
 
     private AddAttendancePanel addAttendancePanel;
     private AttendanceSummaryPanel attendanceSummaryPanel;
@@ -65,10 +86,51 @@ public class TechnicalOfficerDashboard extends JFrame {
     }
 
     public TechnicalOfficerDashboard(TechnicalOfficer officer) {
-        this.currentOfficer = officer;
+        this.profileDAO = new AttendanceDAO();
+        this.currentOfficer = resolveFullOfficerProfile(officer);
         initFrame();
         initComponents();
         navigateTo(CARD_DASHBOARD, "Technical Officer Dashboard");
+    }
+
+    /**
+     * Resolves and enriches the logged-in TechnicalOfficer profile from the database
+     * (works whether LoginFrame passes a 5-arg User, full TechnicalOfficer, or SessionManager).
+     */
+    private TechnicalOfficer resolveFullOfficerProfile(TechnicalOfficer passedOfficer) {
+        TechnicalOfficer candidate = passedOfficer;
+
+        // If null, check if Member 1's SessionManager holds a logged-in User
+        if (candidate == null) {
+            try {
+                Class<?> smClass = Class.forName("com.ftms.util.SessionManager");
+                Object currentUser = smClass.getMethod("getCurrentUser").invoke(null);
+                if (currentUser instanceof TechnicalOfficer toUser) {
+                    candidate = toUser;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (candidate != null) {
+            TechnicalOfficer dbProfile = profileDAO.getTechnicalOfficerProfile(
+                    candidate.getToId(), candidate.getUsername()
+            );
+            if (dbProfile != null) {
+                return dbProfile;
+            }
+            return candidate;
+        }
+
+        // Default fallback to TO_ID = 7 (to01) if launched standalone without LoginFrame
+        TechnicalOfficer defaultProfile = profileDAO.getTechnicalOfficerProfile(7, "to01");
+        if (defaultProfile != null) {
+            return defaultProfile;
+        }
+        return new TechnicalOfficer(
+                7, "to01", "to123", "to01@gmail.com", "TECHNICAL_OFFICER",
+                "Ruwan", "Rathnayake", "0704121966", null, "ICT"
+        );
     }
 
     private void initFrame() {
@@ -99,12 +161,17 @@ public class TechnicalOfficerDashboard extends JFrame {
         lblPageTitle.setFont(new Font("Segoe UI", Font.BOLD, 25));
         lblPageTitle.setForeground(NAVY_DARK);
 
-        String roleBadgeText = (currentOfficer != null && currentOfficer.getDepartment() != null)
-                ? "TECHNICAL OFFICER (" + currentOfficer.getDepartment() + ")"
-                : "TECHNICAL OFFICER";
-        JLabel lblRoleBadge = new JLabel(roleBadgeText);
+        lblRoleBadge = new JLabel(getRoleBadgeString());
         lblRoleBadge.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblRoleBadge.setForeground(TEAL_ACCENT);
+        lblRoleBadge.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        lblRoleBadge.setToolTipText("Click to view Technical Officer Profile");
+        lblRoleBadge.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                navigateTo(CARD_PROFILE, "Technical Officer Profile");
+            }
+        });
 
         headerBar.add(lblPageTitle, BorderLayout.WEST);
         headerBar.add(lblRoleBadge, BorderLayout.EAST);
@@ -121,6 +188,7 @@ public class TechnicalOfficerDashboard extends JFrame {
         medicalApprovalPanel = new MedicalApprovalPanel();
 
         contentCardsPanel.add(createDashboardHomePanel(), CARD_DASHBOARD);
+        contentCardsPanel.add(createProfilePanel(), CARD_PROFILE);
         contentCardsPanel.add(addAttendancePanel, CARD_ATTENDANCE);
         contentCardsPanel.add(attendanceSummaryPanel, CARD_SUMMARY);
         contentCardsPanel.add(addMedicalPanel, CARD_MEDICAL);
@@ -132,6 +200,25 @@ public class TechnicalOfficerDashboard extends JFrame {
         root.add(mainArea, BorderLayout.CENTER);
 
         setContentPane(root);
+    }
+
+    private String getRoleBadgeString() {
+        if (currentOfficer != null && currentOfficer.getDepartment() != null && !currentOfficer.getDepartment().isEmpty()) {
+            return "TECHNICAL OFFICER (" + currentOfficer.getDepartment() + ")";
+        }
+        return "TECHNICAL OFFICER";
+    }
+
+    private String getOfficerDisplayName() {
+        if (currentOfficer != null) {
+            if (currentOfficer.getFname() != null && !currentOfficer.getFname().isEmpty()) {
+                return currentOfficer.getFname();
+            }
+            if (currentOfficer.getUsername() != null && !currentOfficer.getUsername().isEmpty()) {
+                return currentOfficer.getUsername();
+            }
+        }
+        return "Technical Officer";
     }
 
     private JPanel createSidebar() {
@@ -155,12 +242,13 @@ public class TechnicalOfficerDashboard extends JFrame {
         lblSubBrand.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lblSubBrand.setForeground(SIDEBAR_SUBTITLE);
         lblSubBrand.setAlignmentX(Component.LEFT_ALIGNMENT);
-        lblSubBrand.setBorder(new EmptyBorder(0, 8, 28, 0));
+        lblSubBrand.setBorder(new EmptyBorder(0, 8, 26, 0));
 
         topSection.add(lblBrand);
         topSection.add(lblSubBrand);
 
         addNavButton(topSection, CARD_DASHBOARD, "Dashboard", "Technical Officer Dashboard", IconType.DASHBOARD);
+        addNavButton(topSection, CARD_PROFILE, "My Profile", "Technical Officer Profile", IconType.USERS);
         addNavButton(topSection, CARD_ATTENDANCE, "Manage Attendance", "Attendance Management", IconType.USERS);
         addNavButton(topSection, CARD_SUMMARY, "Attendance Summary", "Attendance Summary", IconType.COURSES);
         addNavButton(topSection, CARD_MEDICAL, "Medical Records", "Medical Records Management", IconType.MEDICAL);
@@ -181,7 +269,7 @@ public class TechnicalOfficerDashboard extends JFrame {
         bottomSection.add(separator, BorderLayout.NORTH);
 
         SidebarNavButton btnLogout = new SidebarNavButton("Logout", IconType.LOGOUT);
-        btnLogout.setBorder(new EmptyBorder(12, 12, 8, 12));
+        btnLogout.setBorder(new EmptyBorder(12, 42, 8, 14));
         btnLogout.addActionListener(e -> handleLogout());
         bottomSection.add(btnLogout, BorderLayout.CENTER);
 
@@ -192,12 +280,12 @@ public class TechnicalOfficerDashboard extends JFrame {
     private void addNavButton(JPanel parent, String cardKey, String label, String pageTitle, IconType iconType) {
         SidebarNavButton btn = new SidebarNavButton(label, iconType);
         btn.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
         btn.addActionListener(e -> navigateTo(cardKey, pageTitle));
 
         navButtons.put(cardKey, btn);
         parent.add(btn);
-        parent.add(Box.createVerticalStrut(6));
+        parent.add(Box.createVerticalStrut(5));
     }
 
     public void navigateTo(String cardKey, String pageTitle) {
@@ -206,8 +294,9 @@ public class TechnicalOfficerDashboard extends JFrame {
             entry.getValue().setActive(entry.getKey().equals(cardKey));
         }
 
-        // Refresh data when switching into data-driven panels
-        if (CARD_ATTENDANCE.equals(cardKey) && addAttendancePanel != null) {
+        if (CARD_PROFILE.equals(cardKey)) {
+            populateProfileFields();
+        } else if (CARD_ATTENDANCE.equals(cardKey) && addAttendancePanel != null) {
             addAttendancePanel.loadAttendanceRecords();
         } else if (CARD_SUMMARY.equals(cardKey) && attendanceSummaryPanel != null) {
             attendanceSummaryPanel.loadSummaryData();
@@ -226,26 +315,21 @@ public class TechnicalOfficerDashboard extends JFrame {
 
         // 1. Welcome Banner Card matching the screenshot
         RoundedCardPanel welcomeCard = new RoundedCardPanel(14, CARD_BG, CARD_BORDER);
-        welcomeCard.setLayout(new FlowLayout(FlowLayout.LEFT, 24, 22));
-        welcomeCard.setPreferredSize(new Dimension(0, 130));
+        welcomeCard.setLayout(new BorderLayout(20, 0));
+        welcomeCard.setBorder(new EmptyBorder(20, 24, 20, 24));
+        welcomeCard.setPreferredSize(new Dimension(0, 128));
+
+        JPanel leftBanner = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 4));
+        leftBanner.setOpaque(false);
 
         CircleBadgeIcon bannerIcon = new CircleBadgeIcon(80, ICON_CIRCLE_BG, NAVY_DARK, IconType.INSTITUTE);
-        welcomeCard.add(bannerIcon);
+        leftBanner.add(bannerIcon);
 
         JPanel welcomeTextPanel = new JPanel();
         welcomeTextPanel.setOpaque(false);
         welcomeTextPanel.setLayout(new BoxLayout(welcomeTextPanel, BoxLayout.Y_AXIS));
 
-        String officerDisplayName = "Technical Officer";
-        if (currentOfficer != null) {
-            if (currentOfficer.getFname() != null && !currentOfficer.getFname().isEmpty()) {
-                officerDisplayName = currentOfficer.getFname();
-            } else if (currentOfficer.getUsername() != null && !currentOfficer.getUsername().isEmpty()) {
-                officerDisplayName = currentOfficer.getUsername();
-            }
-        }
-
-        JLabel lblWelcomeTitle = new JLabel("Welcome Back, " + officerDisplayName + "!");
+        lblWelcomeTitle = new JLabel("Welcome Back, " + getOfficerDisplayName() + "!");
         lblWelcomeTitle.setFont(new Font("Segoe UI", Font.BOLD, 21));
         lblWelcomeTitle.setForeground(NAVY_DARK);
 
@@ -257,7 +341,16 @@ public class TechnicalOfficerDashboard extends JFrame {
         welcomeTextPanel.add(Box.createVerticalStrut(6));
         welcomeTextPanel.add(lblWelcomeSub);
 
-        welcomeCard.add(welcomeTextPanel);
+        leftBanner.add(welcomeTextPanel);
+        welcomeCard.add(leftBanner, BorderLayout.WEST);
+
+        JPanel rightBanner = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 24));
+        rightBanner.setOpaque(false);
+        JButton btnViewProfile = createPrimaryButton("My Profile", TEAL_ACCENT, 125);
+        btnViewProfile.addActionListener(e -> navigateTo(CARD_PROFILE, "Technical Officer Profile"));
+        rightBanner.add(btnViewProfile);
+        welcomeCard.add(rightBanner, BorderLayout.EAST);
+
         homePanel.add(welcomeCard, BorderLayout.NORTH);
 
         // 2. Action Cards Grid matching screenshot
@@ -314,6 +407,281 @@ public class TechnicalOfficerDashboard extends JFrame {
         homePanel.add(gridWrapper, BorderLayout.CENTER);
 
         return homePanel;
+    }
+
+    /**
+     * Creates the Technical Officer Profile panel ("My Profile" tab).
+     */
+    private JPanel createProfilePanel() {
+        JPanel profileRoot = new JPanel(new BorderLayout(0, 18));
+        profileRoot.setOpaque(false);
+
+        // 1. Top Officer Summary Banner Card
+        RoundedCardPanel topProfileCard = new RoundedCardPanel(14, CARD_BG, CARD_BORDER);
+        topProfileCard.setLayout(new BorderLayout(20, 0));
+        topProfileCard.setBorder(new EmptyBorder(20, 26, 20, 26));
+
+        JPanel avatarAndInfo = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
+        avatarAndInfo.setOpaque(false);
+
+        lblProfileAvatar = new JLabel();
+        lblProfileAvatar.setPreferredSize(new Dimension(84, 84));
+        lblProfileAvatar.setHorizontalAlignment(SwingConstants.CENTER);
+        lblProfileAvatar.setVerticalAlignment(SwingConstants.CENTER);
+        lblProfileAvatar.setOpaque(true);
+        lblProfileAvatar.setBackground(ICON_CIRCLE_BG);
+        lblProfileAvatar.setForeground(NAVY_DARK);
+        lblProfileAvatar.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        lblProfileAvatar.setBorder(new LineBorder(CARD_BORDER, 2, true));
+
+        JPanel infoBox = new JPanel();
+        infoBox.setOpaque(false);
+        infoBox.setLayout(new BoxLayout(infoBox, BoxLayout.Y_AXIS));
+
+        lblProfileHeaderName = new JLabel();
+        lblProfileHeaderName.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblProfileHeaderName.setForeground(NAVY_DARK);
+
+        lblProfileHeaderSub = new JLabel();
+        lblProfileHeaderSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblProfileHeaderSub.setForeground(TEXT_MUTED);
+
+        infoBox.add(lblProfileHeaderName);
+        infoBox.add(Box.createVerticalStrut(6));
+        infoBox.add(lblProfileHeaderSub);
+
+        avatarAndInfo.add(lblProfileAvatar);
+        avatarAndInfo.add(infoBox);
+        topProfileCard.add(avatarAndInfo, BorderLayout.WEST);
+
+        profileRoot.add(topProfileCard, BorderLayout.NORTH);
+
+        // 2. Profile Details & Edit Form Card
+        JPanel detailsCard = new JPanel(new BorderLayout(0, 16));
+        detailsCard.setBackground(CARD_BG);
+        detailsCard.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(CARD_BORDER, 1, true),
+                new EmptyBorder(22, 26, 22, 26)
+        ));
+
+        JLabel lblFormHeading = new JLabel("Technical Officer Account & Personal Details");
+        lblFormHeading.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblFormHeading.setForeground(NAVY_DARK);
+        detailsCard.add(lblFormHeading, BorderLayout.NORTH);
+
+        JPanel formGrid = new JPanel(new GridBagLayout());
+        formGrid.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 10, 8, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+
+        txtProfileToId = createProfileTextField(false);
+        txtProfileUsername = createProfileTextField(false);
+        txtProfileRole = createProfileTextField(false);
+        txtProfileDepartment = createProfileTextField(true);
+        txtProfileFname = createProfileTextField(true);
+        txtProfileLname = createProfileTextField(true);
+        txtProfileEmail = createProfileTextField(true);
+        txtProfilePhone = createProfileTextField(true);
+        txtProfilePicPath = createProfileTextField(false);
+
+        // Row 1: TO ID, Username, Role
+        addProfileField(formGrid, gbc, 0, 0, 1, "Technical Officer ID (TO_ID)", txtProfileToId);
+        addProfileField(formGrid, gbc, 1, 0, 1, "Username", txtProfileUsername);
+        addProfileField(formGrid, gbc, 2, 0, 1, "System Role", txtProfileRole);
+
+        // Row 2: First Name, Last Name, Department
+        addProfileField(formGrid, gbc, 0, 1, 1, "First Name (Fname)", txtProfileFname);
+        addProfileField(formGrid, gbc, 1, 1, 1, "Last Name (Lname)", txtProfileLname);
+        addProfileField(formGrid, gbc, 2, 1, 1, "Department", txtProfileDepartment);
+
+        // Row 3: Email, Phone, Profile Picture
+        addProfileField(formGrid, gbc, 0, 2, 1, "Email Address", txtProfileEmail);
+        addProfileField(formGrid, gbc, 1, 2, 1, "Phone Number", txtProfilePhone);
+
+        JPanel picPickerWrap = new JPanel(new BorderLayout(6, 0));
+        picPickerWrap.setOpaque(false);
+        JButton btnBrowsePic = createPrimaryButton("Browse...", TEAL_ACCENT, 100);
+        btnBrowsePic.addActionListener(e -> chooseProfilePicture());
+        picPickerWrap.add(txtProfilePicPath, BorderLayout.CENTER);
+        picPickerWrap.add(btnBrowsePic, BorderLayout.EAST);
+        addProfileField(formGrid, gbc, 2, 2, 1, "Profile Picture", picPickerWrap);
+
+        JPanel formNorthWrap = new JPanel(new BorderLayout());
+        formNorthWrap.setOpaque(false);
+        formNorthWrap.add(formGrid, BorderLayout.NORTH);
+        detailsCard.add(formNorthWrap, BorderLayout.CENTER);
+
+        // Bottom Buttons
+        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        actionsPanel.setOpaque(false);
+
+        JButton btnReload = createPrimaryButton("Reload from DB", new Color(108, 122, 137), 145);
+        JButton btnSaveProfile = createPrimaryButton("Update Profile", TEAL_ACCENT, 145);
+
+        btnReload.addActionListener(e -> reloadProfileFromDatabase());
+        btnSaveProfile.addActionListener(e -> saveProfileChanges());
+
+        actionsPanel.add(btnReload);
+        actionsPanel.add(btnSaveProfile);
+
+        detailsCard.add(actionsPanel, BorderLayout.SOUTH);
+        profileRoot.add(detailsCard, BorderLayout.CENTER);
+
+        populateProfileFields();
+        return profileRoot;
+    }
+
+    private void addProfileField(JPanel panel, GridBagConstraints gbc, int col, int row, int width,
+                                 String labelText, JComponent comp) {
+        JPanel wrapper = new JPanel(new BorderLayout(0, 6));
+        wrapper.setOpaque(false);
+
+        JLabel lbl = new JLabel(labelText);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lbl.setForeground(NAVY_DARK);
+
+        comp.setPreferredSize(new Dimension(180, 36));
+        wrapper.add(lbl, BorderLayout.NORTH);
+        wrapper.add(comp, BorderLayout.CENTER);
+
+        gbc.gridx = col;
+        gbc.gridy = row;
+        gbc.gridwidth = width;
+        panel.add(wrapper, gbc);
+        gbc.gridwidth = 1;
+    }
+
+    private JTextField createProfileTextField(boolean editable) {
+        JTextField tf = new JTextField();
+        tf.setEditable(editable);
+        tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        tf.setForeground(NAVY_DARK);
+        tf.setBackground(editable ? Color.WHITE : new Color(240, 244, 248));
+        tf.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(206, 216, 226), 1, true),
+                new EmptyBorder(4, 10, 4, 10)
+        ));
+        return tf;
+    }
+
+    private void chooseProfilePicture() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select Profile Picture");
+        chooser.setFileFilter(new FileNameExtensionFilter("Images (PNG, JPG, JPEG)", "png", "jpg", "jpeg"));
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            txtProfilePicPath.setText(file.getAbsolutePath());
+            updateAvatarPreview(file.getAbsolutePath());
+        }
+    }
+
+    private void updateAvatarPreview(String imagePath) {
+        if (imagePath != null && !imagePath.trim().isEmpty()) {
+            File imgFile = new File(imagePath);
+            if (imgFile.exists()) {
+                ImageIcon rawIcon = new ImageIcon(imgFile.getAbsolutePath());
+                Image scaled = rawIcon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+                lblProfileAvatar.setText("");
+                lblProfileAvatar.setIcon(new ImageIcon(scaled));
+                return;
+            }
+        }
+        lblProfileAvatar.setIcon(null);
+        String initials = "TO";
+        if (currentOfficer != null && currentOfficer.getFname() != null && !currentOfficer.getFname().isEmpty()) {
+            initials = currentOfficer.getFname().substring(0, 1).toUpperCase();
+            if (currentOfficer.getLname() != null && !currentOfficer.getLname().isEmpty()) {
+                initials += currentOfficer.getLname().substring(0, 1).toUpperCase();
+            }
+        }
+        lblProfileAvatar.setText(initials);
+    }
+
+    private void populateProfileFields() {
+        if (currentOfficer == null) {
+            return;
+        }
+        String fullName = ((currentOfficer.getFname() != null ? currentOfficer.getFname() : "") + " "
+                + (currentOfficer.getLname() != null ? currentOfficer.getLname() : "")).trim();
+        if (fullName.isEmpty()) {
+            fullName = currentOfficer.getUsername();
+        }
+
+        lblProfileHeaderName.setText(fullName);
+        lblProfileHeaderSub.setText("TO ID: #" + currentOfficer.getToId()
+                + "  |  Username: " + currentOfficer.getUsername()
+                + "  |  Department: " + (currentOfficer.getDepartment() != null ? currentOfficer.getDepartment() : "N/A"));
+
+        txtProfileToId.setText(String.valueOf(currentOfficer.getToId()));
+        txtProfileUsername.setText(currentOfficer.getUsername() != null ? currentOfficer.getUsername() : "");
+        txtProfileRole.setText(currentOfficer.getRole() != null ? currentOfficer.getRole() : "TECHNICAL_OFFICER");
+        txtProfileDepartment.setText(currentOfficer.getDepartment() != null ? currentOfficer.getDepartment() : "");
+        txtProfileFname.setText(currentOfficer.getFname() != null ? currentOfficer.getFname() : "");
+        txtProfileLname.setText(currentOfficer.getLname() != null ? currentOfficer.getLname() : "");
+        txtProfileEmail.setText(currentOfficer.getEmail() != null ? currentOfficer.getEmail() : "");
+        txtProfilePhone.setText(currentOfficer.getPhone() != null ? currentOfficer.getPhone() : "");
+        txtProfilePicPath.setText(currentOfficer.getProfilePic() != null ? currentOfficer.getProfilePic() : "");
+
+        updateAvatarPreview(currentOfficer.getProfilePic());
+    }
+
+    private void reloadProfileFromDatabase() {
+        if (currentOfficer == null) {
+            return;
+        }
+        TechnicalOfficer refreshed = profileDAO.getTechnicalOfficerProfile(
+                currentOfficer.getToId(), currentOfficer.getUsername()
+        );
+        if (refreshed != null) {
+            this.currentOfficer = refreshed;
+            populateProfileFields();
+            lblWelcomeTitle.setText("Welcome Back, " + getOfficerDisplayName() + "!");
+            lblRoleBadge.setText(getRoleBadgeString());
+        }
+    }
+
+    private void saveProfileChanges() {
+        if (currentOfficer == null) {
+            return;
+        }
+        try {
+            currentOfficer.setFname(txtProfileFname.getText().trim());
+            currentOfficer.setLname(txtProfileLname.getText().trim());
+            currentOfficer.setDepartment(txtProfileDepartment.getText().trim());
+            currentOfficer.setEmail(txtProfileEmail.getText().trim());
+            currentOfficer.setPhone(txtProfilePhone.getText().trim());
+            currentOfficer.setProfilePic(txtProfilePicPath.getText().trim());
+
+            if (profileDAO.updateTechnicalOfficerProfile(currentOfficer)) {
+                populateProfileFields();
+                lblWelcomeTitle.setText("Welcome Back, " + getOfficerDisplayName() + "!");
+                lblRoleBadge.setText(getRoleBadgeString());
+                JOptionPane.showMessageDialog(this,
+                        "Technical Officer profile updated successfully!",
+                        "Profile Updated", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to update profile in database.",
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation Error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private JButton createPrimaryButton(String text, Color bg, int width) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setBackground(bg);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setOpaque(true);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(width, 36));
+        return btn;
     }
 
     private JPanel createFeatureCard(String title, String subtitle, IconType iconType,
@@ -473,7 +841,6 @@ public class TechnicalOfficerDashboard extends JFrame {
         );
         if (choice == JOptionPane.YES_OPTION) {
             dispose();
-            // Open LoginFrame dynamically if present in the project
             try {
                 Class<?> loginClass = Class.forName("com.ftms.view.LoginFrame");
                 Object frame = loginClass.getDeclaredConstructor().newInstance();
@@ -481,7 +848,6 @@ public class TechnicalOfficerDashboard extends JFrame {
                     ((JFrame) frame).setVisible(true);
                 }
             } catch (Exception ignored) {
-                // LoginFrame not yet added by Member 1
             }
         }
     }
@@ -543,7 +909,6 @@ public class TechnicalOfficerDashboard extends JFrame {
                 g2.fill(new RoundRectangle2D.Double(0, 2, getWidth(), getHeight() - 4, 10, 10));
             }
 
-            // Draw left vector icon
             drawVectorIcon(g2, iconType, 14, (getHeight() - 16) / 2, 16, Color.WHITE);
             g2.dispose();
 

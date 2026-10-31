@@ -74,8 +74,7 @@ public class AddMedicalPanel extends JPanel {
         formCard.setBackground(CARD_BG);
         formCard.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(CARD_BORDER, 1, true),
-                new EmptyBorder(18, 22, 18, 22)
-        ));
+                new EmptyBorder(18, 22, 18, 22)));
 
         JLabel lblTitle = new JLabel("Submit / Manage Student Medical Record & Certificate (medicalimg)");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -113,7 +112,7 @@ public class AddMedicalPanel extends JPanel {
         txtReason = createTextField();
         txtReason.setToolTipText("Reason or medical diagnosis notes");
 
-        cmbApprovalStatus = new JComboBox<>(new String[]{
+        cmbApprovalStatus = new JComboBox<>(new String[] {
                 Medical.APPROVAL_PENDING,
                 Medical.APPROVAL_APPROVED,
                 Medical.APPROVAL_REJECTED
@@ -164,7 +163,8 @@ public class AddMedicalPanel extends JPanel {
         docPickerPanel.add(txtDocumentPath, BorderLayout.CENTER);
         docPickerPanel.add(docButtons, BorderLayout.EAST);
 
-        addFormField(fieldsPanel, gbc, 0, 2, 4, "Medical Document / Image (medicalimg - PDF, PNG, JPG)", docPickerPanel);
+        addFormField(fieldsPanel, gbc, 0, 2, 4, "Medical Document / Image (medicalimg - PDF, PNG, JPG)",
+                docPickerPanel);
 
         formCard.add(fieldsPanel, BorderLayout.CENTER);
 
@@ -198,13 +198,13 @@ public class AddMedicalPanel extends JPanel {
         tableCard.setBackground(CARD_BG);
         tableCard.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(CARD_BORDER, 1, true),
-                new EmptyBorder(16, 22, 18, 22)
-        ));
+                new EmptyBorder(16, 22, 18, 22)));
 
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setOpaque(false);
 
-        JLabel lblTableTitle = new JLabel("Medical Records (Select a row and click 'Open / View' to inspect medicalimg)");
+        JLabel lblTableTitle = new JLabel(
+                "Medical Records (Select a row and click 'Open / View' to inspect medicalimg)");
         lblTableTitle.setFont(new Font("Segoe UI", Font.BOLD, 15));
         lblTableTitle.setForeground(NAVY_DARK);
 
@@ -253,12 +253,13 @@ public class AddMedicalPanel extends JPanel {
         add(tableCard, BorderLayout.CENTER);
     }
 
-    private void addFormField(JPanel panel, GridBagConstraints gbc, int col, int row, String labelText, JComponent comp) {
+    private void addFormField(JPanel panel, GridBagConstraints gbc, int col, int row, String labelText,
+            JComponent comp) {
         addFormField(panel, gbc, col, row, 1, labelText, comp);
     }
 
     private void addFormField(JPanel panel, GridBagConstraints gbc, int col, int row, int width,
-                              String labelText, JComponent comp) {
+            String labelText, JComponent comp) {
         JPanel wrapper = new JPanel(new BorderLayout(0, 5));
         wrapper.setOpaque(false);
 
@@ -282,8 +283,7 @@ public class AddMedicalPanel extends JPanel {
         chooser.setDialogTitle("Select Medical Certificate Document / Image");
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
                 "Medical Documents & Images (PDF, PNG, JPG, Word)",
-                "pdf", "png", "jpg", "jpeg", "doc", "docx"
-        );
+                "pdf", "png", "jpg", "jpeg", "doc", "docx");
         chooser.setFileFilter(filter);
 
         int result = chooser.showOpenDialog(this);
@@ -354,7 +354,7 @@ public class AddMedicalPanel extends JPanel {
         tableModel.setRowCount(0);
         for (Medical m : list) {
             String docImg = m.getMedicalImg();
-            tableModel.addRow(new Object[]{
+            tableModel.addRow(new Object[] {
                     m.getMedicalId(),
                     m.getStudentId(),
                     m.getAttendanceId() != null ? m.getAttendanceId() : "",
@@ -537,8 +537,7 @@ public class AddMedicalPanel extends JPanel {
         tf.setForeground(NAVY_DARK);
         tf.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(new Color(206, 216, 226), 1, true),
-                new EmptyBorder(4, 10, 4, 10)
-        ));
+                new EmptyBorder(4, 10, 4, 10)));
         return tf;
     }
 
@@ -584,7 +583,7 @@ public class AddMedicalPanel extends JPanel {
         table.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected,
-                                                           boolean hasFocus, int row, int col) {
+                    boolean hasFocus, int row, int col) {
                 JLabel lbl = (JLabel) super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, col);
                 String text = value != null ? value.toString() : "No Document";
                 if (!"No Document".equalsIgnoreCase(text)) {
@@ -602,7 +601,7 @@ public class AddMedicalPanel extends JPanel {
         table.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected,
-                                                           boolean hasFocus, int row, int col) {
+                    boolean hasFocus, int row, int col) {
                 JLabel lbl = (JLabel) super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, col);
                 lbl.setHorizontalAlignment(SwingConstants.CENTER);
                 lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
