@@ -1,7 +1,7 @@
 package com.ftms.view.student;
 
 import com.ftms.dao.MarksDAO;
-import com.ftms.view.Login;
+import com.ftms.view.LoginFrame;
 import com.ftms.model.GPA;
 import com.ftms.model.Marks;
 import com.ftms.model.Undergraduate;
@@ -98,6 +98,6 @@ public class StudentDashboard extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Login().setVisible(true));
+        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
     }
 }
