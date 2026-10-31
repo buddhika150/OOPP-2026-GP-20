@@ -1,4 +1,3 @@
-
 package com.ftms.view.admin;
 
 import com.ftms.view.LoginFrame;
@@ -195,9 +194,10 @@ public class AdminDashboard extends JFrame {
 
         // MEDIUM-SIZE CARDS
 
-        JPanel cards = new JPanel(
-                new GridLayout(2, 2, 18, 18)
-        );
+        JPanel cards = new JPanel
+                (
+                        new GridLayout(2, 2, 18, 18)
+                );
         cards.setOpaque(false);
 
         JButton usersCard = createCard(
@@ -243,59 +243,31 @@ public class AdminDashboard extends JFrame {
         content.add(body, BorderLayout.CENTER);
         root.add(content, BorderLayout.CENTER);
 
-        //  BUTTON ACTIONS
 
-        // SIDEBAR BUTTON ACTIONS
+        // BUTTON ACTIONS - SIDEBAR
+        usersBtn.addActionListener(e -> openPage(new UserManagement()));
+        coursesBtn.addActionListener(e -> openPage(new CourseManagement()));
+        noticesBtn.addActionListener(e -> openPage(new NoticeManagement()));
+        timetableBtn.addActionListener(e -> openPage(new TimetableManagement()));
 
-        usersBtn.addActionListener(e -> {
-            new UserManagement();
-            dispose();
-        });
+        // DASHBOARD CARD ACTIONS
+        usersCard.addActionListener(e -> openPage(new UserManagement()));
+        coursesCard.addActionListener(e -> openPage(new CourseManagement()));
+        noticesCard.addActionListener(e -> openPage(new NoticeManagement()));
+        timetableCard.addActionListener(e -> openPage(new TimetableManagement()));
 
-        coursesBtn.addActionListener(e -> {
-            new CourseManagement();
-            dispose();
-        });
-
-        noticesBtn.addActionListener(e -> {
-            new NoticeManagement();
-            dispose();
-        });
-
-        timetableBtn.addActionListener(e -> {
-            new TimetableManagement();
-            dispose();
-        });
+        // LOGOUT
+        logout.addActionListener(e -> openPage(new LoginFrame()));
 
 
-// DASHBOARD CARD ACTIONS
-
-        usersCard.addActionListener(e -> {
-            new UserManagement();
-            dispose();
-        });
-
-        coursesCard.addActionListener(e -> {
-            new CourseManagement();
-            dispose();
-        });
-
-        noticesCard.addActionListener(e -> {
-            new NoticeManagement();
-            dispose();
-        });
-
-        timetableCard.addActionListener(e -> {
-            new TimetableManagement();
-            dispose();
-        });
-
-        logout.addActionListener(e -> {
-            dispose();
-            new LoginFrame();
-        });
 
         setVisible(true);
+    }
+
+    // Show the next window, then close the current dashboard.
+    private void openPage(JFrame page) {
+        page.setVisible(true);
+        dispose();
     }
 
     // SIDEBAR BUTTON
