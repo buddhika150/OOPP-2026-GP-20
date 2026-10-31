@@ -99,9 +99,12 @@ public class DashboardHomePanel extends JPanel {
                     }
                     boolean eligible = !marks.isEmpty();
                     for (Marks m : marks) eligible &= m.viewMyEligibility();
-                    eligibilityText.setText(marks.isEmpty() ? "No CA marks available" :
-                            "CA status: " + (eligible ? "ELIGIBLE" : "NOT ELIGIBLE") +
-                                    "\nBased on the existing Marks.viewMyEligibility() rule");
+                    eligibilityText.setText(
+                            marks.isEmpty() ? "No CA marks available" :
+                                    eligible
+                                            ? "CA Status: ELIGIBLE\nYou are eligible for the examination."
+                                            : "CA Status: NOT ELIGIBLE\nYou are not eligible for the examination."
+                    );
                     gradesText.setText(gpa == null ? "GPA: No records available" :
                             String.format("SGPA: %.2f\nCGPA: %.2f\nSemester: %d", gpa.getSgpa(), gpa.getCgpa(), gpa.getSemester()));
                 } catch (Exception ex) {

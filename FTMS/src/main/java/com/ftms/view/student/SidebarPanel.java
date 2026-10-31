@@ -1,7 +1,7 @@
 package com.ftms.view.student;
 
 import com.ftms.util.SessionManager;
-import com.ftms.view.Login;
+import com.ftms.view.LoginFrame;
 import javax.swing.*;
 import java.awt.*;
 
@@ -55,7 +55,7 @@ public class SidebarPanel extends JPanel {
         btnLogout.addActionListener(e -> {
             SessionManager.getInstance().logout();
             parentFrame.dispose();
-            new Login().setVisible(true);
+            new LoginFrame().setVisible(true);
         });
 
         add(btnDashboard);

@@ -1,165 +1,263 @@
+
 package com.ftms.view.student;
 
+import com.ftms.dao.StudentProfileDAO;
 import com.ftms.model.Undergraduate;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.sql.SQLException;
 
 public class ProfilePanel extends JPanel {
+
     private Undergraduate currentStudent;
-    private JLabel lblHeaderName, lblHeaderTg;
-    private JLabel lblProfName, lblProfTg, lblProfDept, lblProfBatch, lblProfNic, lblProfEmail, lblProfPhone, lblProfStatus, lblProfYearSem;
+    private JTextField txtEmail, txtPhone;
+    private JLabel photoLabel;
+    private File selectedPhoto;
 
     public ProfilePanel(Undergraduate currentStudent) {
+
         this.currentStudent = currentStudent;
-        setLayout(new BorderLayout(20, 20));
-        setBorder(new EmptyBorder(25, 30, 25, 30));
+
+        setLayout(new BorderLayout(10, 10));
         setBackground(new Color(240, 242, 245));
+        setBorder(new EmptyBorder(20, 25, 20, 25));
 
-        // Title section
-        JLabel lblTitle = new JLabel("My Profile Details");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblTitle.setForeground(new Color(50, 60, 75));
-        add(lblTitle, BorderLayout.NORTH);
+        JLabel title = new JLabel("My Profile Details");
+        title.setFont(new Font("Arial", Font.BOLD, 22));
+        add(title, BorderLayout.NORTH);
 
-        // Main Card Panel
-        JPanel cardPanel = new JPanel();
-        cardPanel.setLayout(new BoxLayout(cardPanel, BoxLayout.Y_AXIS));
-        cardPanel.setBackground(new Color(248, 249, 250));
-        cardPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(225, 230, 235), 1, true),
-                new EmptyBorder(25, 30, 25, 30)
-        ));
+        // Main profile card
+        JPanel profileContent = new JPanel(new BorderLayout(10, 15));
+        profileContent.setBackground(Color.WHITE);
+        profileContent.setBorder(new EmptyBorder(20, 25, 20, 25));
 
-        // Top Header Section (Name and ID)
-        JPanel topHeader = new JPanel();
-        topHeader.setLayout(new BoxLayout(topHeader, BoxLayout.Y_AXIS));
-        topHeader.setOpaque(false);
-        topHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Profile Photo Section
+        JPanel photoSection = new JPanel();
+        photoSection.setLayout(new BoxLayout(photoSection, BoxLayout.Y_AXIS));
+        photoSection.setBackground(Color.WHITE);
 
-        lblHeaderName = new JLabel("-", SwingConstants.CENTER);
-        lblHeaderName.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        lblHeaderName.setForeground(new Color(25, 30, 45));
-        lblHeaderName.setAlignmentX(Component.CENTER_ALIGNMENT);
+        photoLabel = new JLabel("No Photo", SwingConstants.CENTER);
+        photoLabel.setPreferredSize(new Dimension(130, 130));
+        photoLabel.setMinimumSize(new Dimension(130, 130));
+        photoLabel.setMaximumSize(new Dimension(130, 130));
+        photoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        photoLabel.setBorder(BorderFactory.createLineBorder(
+                new Color(220, 225, 230)));
 
-        lblHeaderTg = new JLabel("Student ID: -", SwingConstants.CENTER);
-        lblHeaderTg.setFont(new Font("Segoe UI", Font.PLAIN, 15));
-        lblHeaderTg.setForeground(new Color(100, 110, 125));
-        lblHeaderTg.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JButton btnPhoto = new JButton("Choose Photo");
+        btnPhoto.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnPhoto.setFocusPainted(false);
+        btnPhoto.addActionListener(e -> choosePhoto());
 
-        topHeader.add(lblHeaderName);
-        topHeader.add(Box.createRigidArea(new Dimension(0, 5)));
-        topHeader.add(lblHeaderTg);
+        photoSection.add(photoLabel);
+        photoSection.add(Box.createVerticalStrut(10));
+        photoSection.add(btnPhoto);
 
-        cardPanel.add(topHeader);
-        cardPanel.add(Box.createRigidArea(new Dimension(0, 25)));
+        profileContent.add(photoSection, BorderLayout.NORTH);
 
-        // Details Grid Panel
-        JPanel detailsGrid = new JPanel(new GridBagLayout());
-        detailsGrid.setOpaque(false);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new java.awt.Insets(8, 10, 8, 10);
+        // Student details
+        JPanel card = new JPanel(new GridLayout(0, 2, 15, 10));
+        card.setBackground(Color.WHITE);
 
-        lblProfName = new JLabel("-");
-        lblProfTg = new JLabel("-");
-        lblProfDept = new JLabel("-");
-        lblProfBatch = new JLabel("-");
-        lblProfNic = new JLabel("-");
-        lblProfEmail = new JLabel("-");
-        lblProfPhone = new JLabel("-");
-        lblProfStatus = createStatusLabel("-");
-        lblProfYearSem = new JLabel("-");
+        addRow(card, "Full Name:",
+                currentStudent.getFname() + " " + currentStudent.getLname());
 
-        // Styling value labels
-        Font valFont = new Font("Segoe UI", Font.PLAIN, 14);
-        Color valColor = new Color(40, 45, 55);
+        addRow(card, "TG Number:", currentStudent.getTgNum());
+        addRow(card, "Department:", currentStudent.getDepartment());
+        addRow(card, "Batch:", currentStudent.getBatch());
+        addRow(card, "NIC:", currentStudent.getNic());
+        addRow(card, "Status:", currentStudent.getStatus());
+        addRow(card, "Year:", String.valueOf(currentStudent.getYear()));
+        addRow(card, "Semester:", String.valueOf(currentStudent.getSemester()));
 
-        JLabel[] valLabels = {lblProfName, lblProfTg, lblProfDept, lblProfBatch, lblProfNic, lblProfEmail, lblProfPhone, lblProfYearSem};
-        for (JLabel l : valLabels) {
-            l.setFont(valFont);
-            l.setForeground(valColor);
+        // Editable Email
+        card.add(new JLabel("Email:"));
+        txtEmail = new JTextField(currentStudent.getEmail());
+        card.add(txtEmail);
+
+        // Editable Phone
+        card.add(new JLabel("Phone:"));
+        txtPhone = new JTextField(currentStudent.getPhone());
+        card.add(txtPhone);
+
+        // Save button
+        JButton btnSave = new JButton("Save Changes");
+        btnSave.setBackground(new Color(35, 110, 190));
+        btnSave.setForeground(Color.WHITE);
+        btnSave.setFocusPainted(false);
+        btnSave.addActionListener(e -> saveProfile());
+
+        JPanel savePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        savePanel.setBackground(Color.WHITE);
+        savePanel.add(btnSave);
+
+        card.add(new JLabel(""));
+        card.add(savePanel);
+
+        profileContent.add(card, BorderLayout.CENTER);
+
+        // Keep profile compact
+        profileContent.setPreferredSize(new Dimension(750, 720));
+
+        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        wrapper.setBackground(new Color(240, 242, 245));
+        wrapper.add(profileContent);
+
+        JScrollPane scrollPane = new JScrollPane(wrapper);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(scrollPane, BorderLayout.CENTER);
+
+        showPhoto(currentStudent.getProfilePic());
+    }
+
+    private void addRow(JPanel panel, String label, String value) {
+        panel.add(new JLabel(label));
+        panel.add(new JLabel(value == null ? "-" : value));
+    }
+
+    // Choose Photo
+    private void choosePhoto() {
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select Profile Photo");
+
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+            File file = chooser.getSelectedFile();
+            String name = file.getName().toLowerCase();
+
+            if (!name.endsWith(".jpg") &&
+                    !name.endsWith(".jpeg") &&
+                    !name.endsWith(".png")) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Please select JPG or PNG image.");
+                return;
+            }
+
+            if (file.length() > 2 * 1024 * 1024) {
+                JOptionPane.showMessageDialog(this,
+                        "Photo must be less than 2MB.");
+                return;
+            }
+
+            selectedPhoto = file;
+            showPhoto(file.getAbsolutePath());
+        }
+    }
+
+    // Display full photo without cropping
+    private void showPhoto(String path) {
+
+        if (path == null || !new File(path).isFile()) {
+            photoLabel.setIcon(null);
+            photoLabel.setText("No Photo");
+            return;
         }
 
-        // Left Column Items
-        addGridRow(detailsGrid, gbc, 0, 0, "Full Name:", lblProfName);
-        addGridRow(detailsGrid, gbc, 0, 1, "Department / Program:", lblProfDept);
-        addGridRow(detailsGrid, gbc, 0, 2, "Batch:", lblProfBatch);
-        addGridRow(detailsGrid, gbc, 0, 3, "NIC:", lblProfNic);
+        ImageIcon icon = new ImageIcon(path);
 
-        // Right Column Items
-        addGridRow(detailsGrid, gbc, 1, 0, "TG Number / ID:", lblProfTg);
-        addGridRow(detailsGrid, gbc, 1, 1, "Email:", lblProfEmail);
-        addGridRow(detailsGrid, gbc, 1, 2, "Phone:", lblProfPhone);
-        addGridRow(detailsGrid, gbc, 1, 3, "Status:", lblProfStatus);
-        addGridRow(detailsGrid, gbc, 1, 4, "Year & Semester:", lblProfYearSem);
+        int width = icon.getIconWidth();
+        int height = icon.getIconHeight();
 
-        cardPanel.add(detailsGrid);
+        if (width <= 0 || height <= 0) {
+            photoLabel.setIcon(null);
+            photoLabel.setText("Invalid Photo");
+            return;
+        }
 
-        // Wrapper Panel for centering layout
-        JPanel centerWrapper = new JPanel(new BorderLayout());
-        centerWrapper.setOpaque(false);
-        centerWrapper.add(cardPanel, BorderLayout.NORTH);
+        double scale = Math.min(125.0 / width, 125.0 / height);
 
-        add(centerWrapper, BorderLayout.CENTER);
+        int newWidth = (int) (width * scale);
+        int newHeight = (int) (height * scale);
 
-        updateProfileData();
+        Image image = icon.getImage().getScaledInstance(
+                newWidth, newHeight, Image.SCALE_SMOOTH);
+
+        photoLabel.setIcon(new ImageIcon(image));
+        photoLabel.setText("");
     }
 
-    private void addGridRow(JPanel panel, GridBagConstraints gbc, int col, int row, String labelText, Component valComp) {
-        gbc.gridx = col * 2;
-        gbc.gridy = row;
-        gbc.weightx = 0.2;
-        JLabel label = new JLabel(labelText);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        label.setForeground(new Color(60, 70, 85));
-        panel.add(label, gbc);
+    // Save Profile
+    private void saveProfile() {
 
-        gbc.gridx = col * 2 + 1;
-        gbc.weightx = 0.8;
-        panel.add(valComp, gbc);
-    }
+        String email = txtEmail.getText().trim();
+        String phone = txtPhone.getText().trim();
 
-    private JLabel createStatusLabel(String text) {
-        JLabel label = new JLabel(text, SwingConstants.CENTER) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(220, 245, 230)); // light green badge background
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-                g2.dispose();
-                super.paintComponent(g);
+        if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            JOptionPane.showMessageDialog(this, "Invalid Email!");
+            return;
+        }
+
+        String photoPath = currentStudent.getProfilePic();
+
+        try {
+
+            if (selectedPhoto != null) {
+
+                File folder = new File("uploads/profile");
+
+                if (!folder.exists() && !folder.mkdirs()) {
+                    throw new IOException("Cannot create photo folder");
+                }
+
+                String name = selectedPhoto.getName().toLowerCase();
+                String extension = name.substring(name.lastIndexOf("."));
+
+                File destination = new File(folder,
+                        "student_" + currentStudent.getStudentId()
+                                + "_" + System.currentTimeMillis()
+                                + extension);
+
+                Files.copy(selectedPhoto.toPath(), destination.toPath());
+
+                photoPath = destination.getAbsolutePath();
             }
-        };
-        label.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        label.setForeground(new Color(40, 140, 75)); // dark green text
-        label.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
-        label.setOpaque(false);
-        return label;
+
+            StudentProfileDAO dao = new StudentProfileDAO();
+
+            boolean saved = dao.updateProfile(
+                    currentStudent.getStudentId(),
+                    email,
+                    phone,
+                    photoPath
+            );
+
+            if (saved) {
+
+                currentStudent.setEmail(email);
+                currentStudent.setPhone(phone);
+                currentStudent.setProfilePic(photoPath);
+
+                selectedPhoto = null;
+                showPhoto(photoPath);
+
+                JOptionPane.showMessageDialog(this,
+                        "Profile Updated Successfully!");
+
+            } else {
+                JOptionPane.showMessageDialog(this, "Update Failed!");
+            }
+
+        } catch (SQLException | IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error: " + ex.getMessage());
+        }
     }
 
+    // Refresh Profile
     public void updateProfileData() {
-        if (currentStudent == null) return;
 
-        String fullName = currentStudent.getFname() + " " + currentStudent.getLname();
-        String tgNum = currentStudent.getTgNum();
+        txtEmail.setText(currentStudent.getEmail());
+        txtPhone.setText(currentStudent.getPhone());
 
-        lblHeaderName.setText(fullName);
-        lblHeaderTg.setText("Student ID: " + tgNum);
-
-        lblProfName.setText(fullName);
-        lblProfTg.setText(tgNum);
-        lblProfDept.setText(currentStudent.getDepartment());
-        lblProfBatch.setText(currentStudent.getBatch());
-        lblProfNic.setText(currentStudent.getNic());
-        lblProfEmail.setText(currentStudent.getEmail());
-        lblProfPhone.setText(currentStudent.getPhone());
-
-        String statusText = currentStudent.getStatus() != null ? currentStudent.getStatus().toUpperCase() : "-";
-        lblProfStatus.setText("● " + statusText);
-
-        lblProfYearSem.setText("Year " + currentStudent.getYear() + " - Semester " + currentStudent.getSemester());
+        if (selectedPhoto == null) {
+            showPhoto(currentStudent.getProfilePic());
+        }
     }
 }

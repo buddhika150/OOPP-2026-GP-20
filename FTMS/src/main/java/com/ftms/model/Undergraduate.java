@@ -1,6 +1,8 @@
+
 package com.ftms.model;
 
-public class Undergraduate {
+public class Undergraduate extends User {
+
     private int studentId;
     private String tgNum;
     private String batch;
@@ -11,10 +13,29 @@ public class Undergraduate {
     private int semester;
     private String fname;
     private String lname;
-    private String email;
     private String phone;
+    private String profilePic;
 
-    public Undergraduate(int studentId, String tgNum, String batch, String department, String nic, String status, int year, int semester, String fname, String lname, String email, String phone) {
+    // Existing constructor - compatibility
+    public Undergraduate(int studentId, String tgNum, String batch,
+                         String department, String nic, String status,
+                         int year, int semester, String fname,
+                         String lname, String email, String phone) {
+
+        this(studentId, tgNum, batch, department, nic, status,
+                year, semester, fname, lname, email, phone,
+                tgNum, null);
+    }
+
+    // Constructor with database Username and Profile_pic
+    public Undergraduate(int studentId, String tgNum, String batch,
+                         String department, String nic, String status,
+                         int year, int semester, String fname,
+                         String lname, String email, String phone,
+                         String username, String profilePic) {
+
+        super(studentId, username, "", email, "student");
+
         this.studentId = studentId;
         this.tgNum = tgNum;
         this.batch = batch;
@@ -25,8 +46,8 @@ public class Undergraduate {
         this.semester = semester;
         this.fname = fname;
         this.lname = lname;
-        this.email = email;
         this.phone = phone;
+        this.profilePic = profilePic;
     }
 
     public int getStudentId() { return studentId; }
@@ -39,6 +60,19 @@ public class Undergraduate {
     public int getSemester() { return semester; }
     public String getFname() { return fname; }
     public String getLname() { return lname; }
-    public String getEmail() { return email; }
     public String getPhone() { return phone; }
+    public String getProfilePic() { return profilePic; }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
+    }
+
+    @Override
+    public void viewDashboard() {
+        System.out.println("Undergraduate Dashboard");
+    }
 }

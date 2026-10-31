@@ -2,34 +2,40 @@
 package com.ftms.dao;
 
 import com.ftms.database.DatabaseConnection;
+import com.ftms.util.SessionManager;
 import java.sql.*;
 
 public class LoginDAO {
 
     public String login(String username, String password) {
 
-        try {
-            Connection con = DatabaseConnection.getConnection();
+        String sql = "SELECT User_ID, Role FROM `User` " +
+                "WHERE Username = ? AND Password = ?";
 
-            String sql = "SELECT * FROM User WHERE Username=? AND Password=?";
+        SessionManager.getInstance().logout();
 
-            PreparedStatement pst = con.prepareStatement(sql);
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
 
             pst.setString(1, username);
             pst.setString(2, password);
 
-            ResultSet rs = pst.executeQuery();
+            try (ResultSet rs = pst.executeQuery()) {
 
-            if (rs.next()) {
-                String role = rs.getString("Role");
-                con.close();
-                return role;
+                if (rs.next()) {
+
+                    int userId = rs.getInt("User_ID");
+                    String role = rs.getString("Role");
+
+                    SessionManager.getInstance()
+                            .setLoggedInUserId(userId);
+
+                    return role;
+                }
             }
 
-            con.close();
-
-        } catch (Exception e) {
-            System.out.println(e);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return null;
