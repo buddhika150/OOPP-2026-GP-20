@@ -1,3 +1,4 @@
+
 package com.ftms.model;
 
 public abstract class User {
@@ -9,7 +10,7 @@ public abstract class User {
     protected String role;
 
     public User(int userId, String username, String password,
-            String email, String role) {
+                String email, String role) {
         this.userId = userId;
         this.username = username;
         this.password = password;
@@ -17,6 +18,7 @@ public abstract class User {
         this.role = role;
     }
 
+    // Getters
     public int getUserId() {
         return userId;
     }
@@ -33,5 +35,19 @@ public abstract class User {
         return role;
     }
 
+    // Setters
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    // Abstract method
     public abstract void viewDashboard();
 }
