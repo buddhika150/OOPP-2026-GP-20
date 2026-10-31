@@ -1,12 +1,13 @@
+
 package com.ftms.model;
 
 public abstract class User {
 
-    private int userId;
-    private String username;
-    private String password;
-    private String email;
-    private String role;
+    protected int userId;
+    protected String username;
+    protected String password;
+    protected String email;
+    protected String role;
 
     public User(int userId, String username, String password,
                 String email, String role) {

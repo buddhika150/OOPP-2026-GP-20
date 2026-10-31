@@ -1,15 +1,15 @@
+
 package com.ftms;
 
-import javax.swing.SwingUtilities;
 import com.ftms.view.LoginFrame;
+import javax.swing.SwingUtilities;
 
 public class Main {
 
     public static void main(String[] args) {
-
         SwingUtilities.invokeLater(() -> {
-            new LoginFrame().setVisible(true);
+            LoginFrame loginFrame = new LoginFrame();
+            loginFrame.setVisible(true);
         });
-
     }
 }
