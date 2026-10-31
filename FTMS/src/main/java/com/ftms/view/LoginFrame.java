@@ -3,8 +3,8 @@ package com.ftms.view;
 
 import com.ftms.dao.LoginDAO;
 import com.ftms.view.admin.AdminDashboard;
-import com.ftms.view.student.StudentDashboard;
 
+import com.ftms.view.student.StudentDashboard;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

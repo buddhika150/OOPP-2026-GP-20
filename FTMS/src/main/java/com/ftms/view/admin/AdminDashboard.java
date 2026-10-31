@@ -1,6 +1,8 @@
 package com.ftms.view.admin;
 
 import com.ftms.view.LoginFrame;
+import com.ftms.dao.AdminDAO;
+import java.sql.SQLException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -168,6 +170,26 @@ public class AdminDashboard extends JFrame {
         welcome.add(welcomeText);
 
         body.add(welcome, BorderLayout.NORTH);
+        AdminDAO adminDAO = new AdminDAO();
+
+        int totalUsers = 0;
+        int totalCourses = 0;
+        int totalNotices = 0;
+        int totalTimetables = 0;
+
+        try {
+            totalUsers = adminDAO.getTotalUsers();
+            totalCourses = adminDAO.getTotalCourses();
+            totalNotices = adminDAO.getTotalNotices();
+            totalTimetables = adminDAO.getTotalTimetables();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to load dashboard counts: " + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
 
 
         // MEDIUM-SIZE CARDS
@@ -179,27 +201,28 @@ public class AdminDashboard extends JFrame {
         cards.setOpaque(false);
 
         JButton usersCard = createCard(
-                "users",
-                "Manage Users",
-                "Manage faculty user accounts"
-        );
+
+                        "users",
+                        "Manage Users",
+                        "Total Users: " + totalUsers
+                );
 
         JButton coursesCard = createCard(
                 "book",
                 "Manage Courses",
-                "Manage academic courses"
+                "Total Courses: " + totalCourses
         );
 
         JButton noticesCard = createCard(
                 "megaphone",
                 "Manage Notices",
-                "Publish faculty updates"
+                "Total Notices: " + totalNotices
         );
 
         JButton timetableCard = createCard(
                 "calendar",
                 "Timetable",
-                "Manage class schedules"
+                "Total Timetables: " + totalTimetables
         );
 
         cards.add(usersCard);
@@ -220,26 +243,23 @@ public class AdminDashboard extends JFrame {
         content.add(body, BorderLayout.CENTER);
         root.add(content, BorderLayout.CENTER);
 
-        // BUTTON ACTIONS - open the selected page before closing dashboard
-        usersBtn.addActionListener(e -> openPage(new UserManagement()));
 
+        // BUTTON ACTIONS - SIDEBAR
+        usersBtn.addActionListener(e -> openPage(new UserManagement()));
+        coursesBtn.addActionListener(e -> openPage(new CourseManagement()));
         noticesBtn.addActionListener(e -> openPage(new NoticeManagement()));
         timetableBtn.addActionListener(e -> openPage(new TimetableManagement()));
 
+        // DASHBOARD CARD ACTIONS
         usersCard.addActionListener(e -> openPage(new UserManagement()));
-        coursesBtn.addActionListener(e -> {
-            new CourseManagement();
-
-        });
-
-        coursesCard.addActionListener(e -> {
-            new CourseManagement();
-
-        });
+        coursesCard.addActionListener(e -> openPage(new CourseManagement()));
         noticesCard.addActionListener(e -> openPage(new NoticeManagement()));
         timetableCard.addActionListener(e -> openPage(new TimetableManagement()));
 
+        // LOGOUT
         logout.addActionListener(e -> openPage(new LoginFrame()));
+
+
 
         setVisible(true);
     }

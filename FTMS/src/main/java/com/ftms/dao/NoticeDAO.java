@@ -1,20 +1,32 @@
-
 package com.ftms.dao;
 
 import com.ftms.database.DatabaseConnection;
 import java.sql.*;
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
 
 public class NoticeDAO {
 
+    // View all notices
     public ResultSet getNotices() throws SQLException {
-        Connection con = DatabaseConnection.getConnection();
-        PreparedStatement ps = con.prepareStatement(
-                "SELECT Notice_ID, Title, Content, Published_date " +
-                        "FROM notice ORDER BY Notice_ID DESC"
-        );
-        return ps.executeQuery();
+
+        String sql = "SELECT Notice_ID, Title, Content, Published_date " +
+                "FROM notice ORDER BY Notice_ID DESC";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            CachedRowSet notices = RowSetProvider
+                    .newFactory()
+                    .createCachedRowSet();
+
+            notices.populate(rs);
+            return notices;
+        }
     }
 
+    // Add notice
     public boolean addNotice(String title, String content)
             throws SQLException {
 
@@ -25,7 +37,7 @@ public class NoticeDAO {
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setInt(1, 1);
+            ps.setInt(1, 1); // Temporary Admin ID
             ps.setString(2, title);
             ps.setString(3, content);
 
@@ -33,6 +45,7 @@ public class NoticeDAO {
         }
     }
 
+    // Update notice
     public boolean updateNotice(int id, String title, String content)
             throws SQLException {
 
@@ -50,6 +63,7 @@ public class NoticeDAO {
         }
     }
 
+    // Delete notice
     public boolean deleteNotice(int id) throws SQLException {
 
         String sql = "DELETE FROM notice WHERE Notice_ID=?";
