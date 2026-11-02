@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 import com.ftms.model.Add_course_material;
+import com.ftms.view.LoginFrame;
 
 
 public class CourseMaterials extends JFrame {
@@ -48,7 +49,7 @@ public class CourseMaterials extends JFrame {
     private void setupwindow(){
 
         setTitle("courses Materials");
-        setSize(800 ,500);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10 , 10));
         getContentPane().setBackground(new Color(245, 249, 252));
@@ -440,214 +441,256 @@ private  void material_tabel(){
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//sidebar
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //sidebar
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-private  void CreaterSidebar(){
+    private  void CreaterSidebar(){
 
-    JPanel sidebar = new JPanel();
-    Color sidebar_color = new Color(16,45,79);
+        JPanel sidebar = new JPanel();
+        Color sidebar_color = new Color(16,45,79);
 
-    sidebar.setBackground(sidebar_color);
+        sidebar.setBackground(sidebar_color);
 
-    this.add(sidebar , BorderLayout.WEST);
+        this.add(sidebar , BorderLayout.WEST);
 
 
-    // FTMS text
+        // FTMS text
 
-    JLabel sidebar_headr_text = new JLabel("FTMS");
-    sidebar_headr_text.setForeground(Color.WHITE);
-    sidebar_headr_text.setFont(new Font("Arial",Font.BOLD,40));
-    sidebar.add(sidebar_headr_text);
+        JLabel sidebar_headr_text = new JLabel("FTMS");
+        sidebar_headr_text.setForeground(Color.WHITE);
+        sidebar_headr_text.setFont(new Font("Arial",Font.BOLD,40));
+        sidebar.add(sidebar_headr_text);
 
 
-    //FACULTY OF TECHNOLOGY
-    //MANAGEMENT SYSTEM   text
+        //FACULTY OF TECHNOLOGY
+        //MANAGEMENT SYSTEM   text
 
-    JLabel sidebar_dear_text_2 = new JLabel("FACULTY OF TECHNOLOGY");
-    sidebar_dear_text_2.setForeground(Color.WHITE);
-    sidebar_dear_text_2.setFont(new Font("Arial",Font.BOLD,15));
-    sidebar.add(sidebar_dear_text_2);
+        JLabel sidebar_dear_text_2 = new JLabel("FACULTY OF TECHNOLOGY");
+        sidebar_dear_text_2.setForeground(Color.WHITE);
+        sidebar_dear_text_2.setFont(new Font("Arial",Font.BOLD,15));
+        sidebar.add(sidebar_dear_text_2);
 
 
-    JLabel sidebar_dear_text_3 = new JLabel("MANAGEMENT SYSTEM");
-    sidebar_dear_text_3.setForeground(Color.WHITE);
-    sidebar_dear_text_3.setFont(new Font("Arial",Font.BOLD,15));
-    sidebar.add(sidebar_dear_text_3);
+        JLabel sidebar_dear_text_3 = new JLabel("MANAGEMENT SYSTEM");
+        sidebar_dear_text_3.setForeground(Color.WHITE);
+        sidebar_dear_text_3.setFont(new Font("Arial",Font.BOLD,15));
+        sidebar.add(sidebar_dear_text_3);
 
 
 
-    //side bar button common variable
+        //side bar button common variable
 
-    Dimension sidebar_size = new Dimension(250,500);
-    sidebar.setPreferredSize(sidebar_size);
+        Dimension sidebar_size = new Dimension(250,500);
+        sidebar.setPreferredSize(sidebar_size);
 
 
-    Color sidebar_button_color = new Color(0,143,156);
-    Dimension sidebar_button_size = new Dimension(215,40);
+        Color sidebar_button_color = new Color(0,143,156);
+        Dimension sidebar_button_size = new Dimension(215,40);
 
-    //Dashbord
-    JButton dashbord_button = new JButton("Dashbord");
-    dashbord_button.setFont(new Font("Arial",Font.BOLD,15));
+        //Dashbord
+        JButton dashbord_button = new JButton("Dashbord");
+        dashbord_button.setFont(new Font("Arial",Font.BOLD,15));
 
-    sidebar.add(dashbord_button);
+        sidebar.add(dashbord_button);
 
-    dashbord_button.setBackground(sidebar_button_color);
-    dashbord_button.setForeground(Color.WHITE);
+        dashbord_button.setBackground(sidebar_button_color);
+        dashbord_button.setForeground(Color.WHITE);
 
-    dashbord_button.setPreferredSize(sidebar_button_size);
+        dashbord_button.setPreferredSize(sidebar_button_size);
 
-    dashbord_button.addActionListener( e -> {
-        new LecturerDashboard(lectureId);
-    });
+        dashbord_button.addActionListener( e -> {
+            new LecturerDashboard(lectureId);
+            this.setVisible(false);
+        });
 
 
-    URL Dash_path = getClass().getResource("/images/house.png");
-    ImageIcon dashbord_icon = new ImageIcon(Dash_path);
-    dashbord_button.setIcon(dashbord_icon);
+        URL Dash_path = getClass().getResource("/images/house.png");
+        ImageIcon dashbord_icon = new ImageIcon(Dash_path);
+        dashbord_button.setIcon(dashbord_icon);
 
 
-    dashbord_button.setHorizontalAlignment(SwingConstants.LEFT);
-    dashbord_button.setIconTextGap(15);
+        dashbord_button.setHorizontalAlignment(SwingConstants.LEFT);
+        dashbord_button.setIconTextGap(15);
 
 
 
 
 
-    //my course
+        //my course
 
-    JButton my_course_button = new JButton("My Course");
-    sidebar.add(my_course_button);
+        JButton my_course_button = new JButton("My Course");
+        sidebar.add(my_course_button);
 
-    my_course_button.setPreferredSize(sidebar_button_size);
-    my_course_button.setBackground(sidebar_button_color);
-    my_course_button.setForeground(Color.WHITE);
+        my_course_button.setPreferredSize(sidebar_button_size);
+        my_course_button.setBackground(sidebar_button_color);
+        my_course_button.setForeground(Color.WHITE);
 
-    URL manage_path = getClass().getResource("/images/book.png");
-    ImageIcon manage_icon = new ImageIcon(manage_path);
-    my_course_button.setIcon(manage_icon);
+        URL manage_path = getClass().getResource("/images/book.png");
+        ImageIcon manage_icon = new ImageIcon(manage_path);
+        my_course_button.setIcon(manage_icon);
 
-    my_course_button.setHorizontalAlignment(SwingConstants.LEFT);
-    my_course_button.setIconTextGap(15);
+        my_course_button.setHorizontalAlignment(SwingConstants.LEFT);
+        my_course_button.setIconTextGap(15);
 
-    my_course_button.addActionListener(e -> {
-        new MyCourses(lectureId);
-    });
+        my_course_button.addActionListener(e -> {
+            new MyCourses(lectureId);
+            this.setVisible(false);
+        });
 
 
-    //course material
+        //course material
 
-    JButton course_material_button = new JButton("Upload Material");
-    sidebar.add(course_material_button);
+        JButton course_material_button = new JButton("Upload Material");
+        sidebar.add(course_material_button);
 
-    course_material_button.setPreferredSize(sidebar_button_size);
-    course_material_button.setBackground(sidebar_button_color);
-    course_material_button.setForeground(Color.WHITE);
+        course_material_button.setPreferredSize(sidebar_button_size);
+        course_material_button.setBackground(sidebar_button_color);
+        course_material_button.setForeground(Color.WHITE);
 
-    URL course_path = getClass().getResource("/images/file.png");
-    ImageIcon course_icon = new ImageIcon(course_path);
-    course_material_button.setIcon(course_icon);
+        URL course_path = getClass().getResource("/images/file.png");
+        ImageIcon course_icon = new ImageIcon(course_path);
+        course_material_button.setIcon(course_icon);
 
-    course_material_button.setHorizontalAlignment(SwingConstants.LEFT);
-    course_material_button.setIconTextGap(15);
+        course_material_button.setHorizontalAlignment(SwingConstants.LEFT);
+        course_material_button.setIconTextGap(15);
 
-    course_material_button.addActionListener(e -> {
-        new CourseMaterials(lectureId);
-    });
+        course_material_button.addActionListener(e -> {
+            new CourseMaterials(lectureId);
+            this.setVisible(false);
+        });
 
 
-    //Upload marks
+        //Upload marks
 
-    JButton upload_marks_button = new JButton("Upload Marks");
-    sidebar.add(upload_marks_button);
+        JButton upload_marks_button = new JButton("Upload Marks");
+        sidebar.add(upload_marks_button);
 
-    upload_marks_button.setPreferredSize(sidebar_button_size);
-    upload_marks_button.setBackground(sidebar_button_color);
-    upload_marks_button.setForeground(Color.WHITE);
+        upload_marks_button.setPreferredSize(sidebar_button_size);
+        upload_marks_button.setBackground(sidebar_button_color);
+        upload_marks_button.setForeground(Color.WHITE);
 
-    URL upload_mark_path = getClass().getResource("/images/upload_marks.png");
-    ImageIcon uploadmark_icon = new ImageIcon(upload_mark_path);
-    upload_marks_button.setIcon(uploadmark_icon);
+        URL upload_mark_path = getClass().getResource("/images/upload_marks.png");
+        ImageIcon uploadmark_icon = new ImageIcon(upload_mark_path);
+        upload_marks_button.setIcon(uploadmark_icon);
 
-    upload_marks_button.setHorizontalAlignment(SwingConstants.LEFT);
-    upload_marks_button.setIconTextGap(15);
+        upload_marks_button.setHorizontalAlignment(SwingConstants.LEFT);
+        upload_marks_button.setIconTextGap(15);
 
-    upload_marks_button.addActionListener(e -> {
-        new UploadMarks(lectureId);
+        upload_marks_button.addActionListener(e -> {
+            new UploadMarks(lectureId);
+            this.setVisible(false);
 
 
-    });
+        });
 
 
-    //Attendance  summary
+        //Attendance  summary
 
-    JButton attendance_button = new JButton("Attendance Summary");
-    sidebar.add(attendance_button);
+        JButton attendance_button = new JButton("Attendance Summary");
+        sidebar.add(attendance_button);
 
-    attendance_button.setPreferredSize(sidebar_button_size);
-    attendance_button.setBackground(sidebar_button_color);
-    attendance_button.setForeground(Color.WHITE);
+        attendance_button.setPreferredSize(sidebar_button_size);
+        attendance_button.setBackground(sidebar_button_color);
+        attendance_button.setForeground(Color.WHITE);
 
-    URL attendance_image_path = getClass().getResource("/images/attendance_summary.png");
-    ImageIcon attendance_icon = new ImageIcon(attendance_image_path);
-    attendance_button.setIcon(attendance_icon);
+        URL attendance_image_path = getClass().getResource("/images/attendance_summary.png");
+        ImageIcon attendance_icon = new ImageIcon(attendance_image_path);
+        attendance_button.setIcon(attendance_icon);
 
-    attendance_button.setHorizontalAlignment(SwingConstants.LEFT);
-    attendance_button.setIconTextGap(15);
+        attendance_button.setHorizontalAlignment(SwingConstants.LEFT);
+        attendance_button.setIconTextGap(15);
 
-    attendance_button.addActionListener(e -> {
-        new LecturerAttendanceSummary(lectureId);
+        attendance_button.addActionListener(e -> {
+            new LecturerAttendanceSummary(lectureId);
+            this.setVisible(false);
 
 
-    });
+        });
 
 
 
-    //Student Eligibility
+        //Student Eligibility
 
-    JButton eligibility_button = new JButton("Attendance Summary");
-    sidebar.add(attendance_button);
+        JButton eligibility_button = new JButton("Student Eligibility");
+        sidebar.add(eligibility_button);
 
-    eligibility_button.setPreferredSize(sidebar_button_size);
-    eligibility_button.setBackground(sidebar_button_color);
-    eligibility_button.setForeground(Color.WHITE);
+        eligibility_button.setPreferredSize(sidebar_button_size);
+        eligibility_button.setBackground(sidebar_button_color);
+        eligibility_button.setForeground(Color.WHITE);
 
-    URL eligibility_image_path = getClass().getResource("/images/student_eligibility.png");
-    ImageIcon eligibility_icon = new ImageIcon(eligibility_image_path);
-    eligibility_button.setIcon(eligibility_icon);
+        URL eligibility_image_path = getClass().getResource("/images/student_eligibility.png");
+        ImageIcon eligibility_icon = new ImageIcon(eligibility_image_path);
+        eligibility_button.setIcon(eligibility_icon);
 
-    eligibility_button.setHorizontalAlignment(SwingConstants.LEFT);
-    eligibility_button.setIconTextGap(15);
+        eligibility_button.setHorizontalAlignment(SwingConstants.LEFT);
+        eligibility_button.setIconTextGap(15);
 
-    eligibility_button.addActionListener(e -> {
+        eligibility_button.addActionListener(e -> {
 
+            this.setVisible(false);
 
 
-    });
+        });
 
-    //log out
 
-    JButton logout_button = new JButton("Logout");
-    sidebar.add(logout_button);
+        //Profile button
 
-    logout_button.setPreferredSize(sidebar_button_size);
-    logout_button.setBackground(sidebar_button_color);
-    logout_button.setForeground(Color.WHITE);
+        JButton  profile_button= new JButton("Profile");
+        sidebar.add(profile_button);
 
+        profile_button.setPreferredSize(sidebar_button_size);
+        profile_button.setBackground(sidebar_button_color);
+        profile_button.setForeground(Color.WHITE);
 
-    URL log_path = getClass().getResource("/images/logout.png");
-    ImageIcon log_icon = new ImageIcon(log_path);
-    logout_button.setIcon(log_icon);
+        URL profile_image_path = getClass().getResource("/images/student_eligibility.png");
+        ImageIcon profile_icon = new ImageIcon(profile_image_path);
+        profile_button.setIcon(profile_icon);
 
+        profile_button.setHorizontalAlignment(SwingConstants.LEFT);
+        profile_button.setIconTextGap(15);
 
-    logout_button.setHorizontalAlignment(SwingConstants.LEFT);
-    logout_button.setIconTextGap(15);
+        profile_button.addActionListener(e -> {
+
+            new LecturerProfile(lectureId);
+            this.setVisible(false);
+
+
+        });
+
+        //log out
+
+        JButton logout_button = new JButton("Logout");
+        sidebar.add(logout_button);
+
+        logout_button.setPreferredSize(sidebar_button_size);
+        logout_button.setBackground(sidebar_button_color);
+        logout_button.setForeground(Color.WHITE);
+
+
+        URL log_path = getClass().getResource("/images/logout.png");
+        ImageIcon log_icon = new ImageIcon(log_path);
+        logout_button.setIcon(log_icon);
+
+
+        logout_button.setHorizontalAlignment(SwingConstants.LEFT);
+        logout_button.setIconTextGap(15);
+
+        logout_button.addActionListener(e -> {
+
+            // Open Login Frame
+            new LoginFrame().setVisible(true);
+
+            // Close Dashboard
+            this.dispose();
+
+        });
+
+
+
+
+    }
+
 
 
 }
-
-
-
-}
-
