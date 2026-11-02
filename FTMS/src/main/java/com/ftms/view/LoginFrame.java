@@ -1,10 +1,12 @@
 
 package com.ftms.view;
+import com.ftms.util.SessionManager;
 
 import com.ftms.dao.LoginDAO;
 import com.ftms.view.admin.AdminDashboard;
-
+import com.ftms.view.technicalofficer.TechnicalOfficerDashboard;
 import com.ftms.view.student.StudentDashboard;
+import com.ftms.view.lecturer.LecturerDashboard;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -212,6 +214,25 @@ public class LoginFrame extends JFrame {
                     studentDashboard.setVisible(true);
                     dispose();
                     break;
+                case "technical_officer":
+                    TechnicalOfficerDashboard technicalDashboard =
+                            new TechnicalOfficerDashboard();
+
+                    technicalDashboard.setVisible(true);
+                    dispose();
+                    break;
+
+
+                case "lecturer": {
+                    int lecturerId = SessionManager.getInstance().getLoggedInUserId();
+
+                    LecturerDashboard lecturerDashboard =
+                            new LecturerDashboard(lecturerId);
+
+                    lecturerDashboard.setVisible(true);
+                    dispose();
+                    break;
+                }
 
                 default:
                     JOptionPane.showMessageDialog(
