@@ -86,7 +86,7 @@ public class AttendancePanel extends JPanel {
 
         add(contentContainer, BorderLayout.CENTER);
 
-        String[] columns = {"Course Code", "Course Name", "Total Lectures", "Attended", "Percentage (%)"};
+        String[] columns = {"Course Code", "Course Name", "Total Lectures", "Attended", "Percentage (%)", "Theory (%)", "Practical (%)"};
         attendanceTableModel = new DefaultTableModel(columns, 0);
         refreshAttendance();
     }
@@ -137,12 +137,12 @@ public class AttendancePanel extends JPanel {
                 String attended = String.valueOf(record.getAttendedSessions());
                 String pct = String.format("%.2f%%", record.getPercentage());
 
-                JPanel card = createCourseCard(courseName, code, total, attended, pct, (int) record.getPercentage());
+                JPanel card = createCourseCard(courseName, code, total, attended, pct, (int) record.getPercentage(), record);
                 gridPanel.add(card);
 
                 totalSessions += record.getTotalSessions();
                 attendedSessions += record.getAttendedSessions();
-                attendanceTableModel.addRow(new Object[]{code, courseName, record.getTotalSessions(), record.getAttendedSessions(), record.getPercentage()});
+                attendanceTableModel.addRow(new Object[]{code, courseName, record.getTotalSessions(), record.getAttendedSessions(), record.getPercentage(), record.getTheoryPercentage(), record.getPracticalPercentage()});
             }
 
             if (totalSessions > 0) {
@@ -155,7 +155,7 @@ public class AttendancePanel extends JPanel {
         gridPanel.repaint();
     }
 
-    private JPanel createCourseCard(String courseName, String code, String total, String attended, String pct, int progressVal) {
+    private JPanel createCourseCard(String courseName, String code, String total, String attended, String pct, int progressVal, AttendanceRecord record) {
         JPanel card = createRoundedPanel(15);
         card.setLayout(new BorderLayout(15, 15));
         card.setBackground(Color.WHITE);
@@ -230,7 +230,21 @@ public class AttendancePanel extends JPanel {
         body.add(pctPanel, BorderLayout.EAST);
 
         card.add(header, BorderLayout.NORTH);
-        card.add(body, BorderLayout.SOUTH);
+        JPanel attendanceTypes = new JPanel(new GridLayout(2, 1, 0, 5));
+        attendanceTypes.setOpaque(false);
+        JLabel theoryLabel = new JLabel(String.format("Theory: %d/%d (%.2f%%)",
+                record.getTheoryAttended(), record.getTheoryTotal(), record.getTheoryPercentage()));
+        JLabel practicalLabel = new JLabel(String.format("Practical: %d/%d (%.2f%%)",
+                record.getPracticalAttended(), record.getPracticalTotal(), record.getPracticalPercentage()));
+        theoryLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        practicalLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        attendanceTypes.add(theoryLabel);
+        attendanceTypes.add(practicalLabel);
+        JPanel bottom = new JPanel(new BorderLayout(0, 8));
+        bottom.setOpaque(false);
+        bottom.add(attendanceTypes, BorderLayout.NORTH);
+        bottom.add(body, BorderLayout.SOUTH);
+        card.add(bottom, BorderLayout.SOUTH);
 
         return card;
     }

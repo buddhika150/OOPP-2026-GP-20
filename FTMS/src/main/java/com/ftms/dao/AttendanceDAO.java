@@ -16,13 +16,13 @@ public class AttendanceDAO {
 
         String checkSql =
                 "SELECT COUNT(*) FROM attendance " +
-                "WHERE Student_ID = ? AND Course_code = ? " +
-                "AND Session_date = ? AND Type = ?";
+                        "WHERE Student_ID = ? AND Course_code = ? " +
+                        "AND Session_date = ? AND Type = ?";
 
         String insertSql =
                 "INSERT INTO attendance " +
-                "(Student_ID, Course_code, Session_date, Type, Is_Present) " +
-                "VALUES (?, ?, ?, ?, ?)";
+                        "(Student_ID, Course_code, Session_date, Type, Is_Present) " +
+                        "VALUES (?, ?, ?, ?, ?)";
 
         if (a.getSessionDate() == null) {
             return false;
@@ -197,7 +197,7 @@ public class AttendanceDAO {
     public double calculateAttendancePercentage(int studentId, String courseCode) {
         String sql =
                 "SELECT COUNT(*) AS total, COALESCE(SUM(Is_Present), 0) AS attended " +
-                "FROM attendance WHERE Student_ID = ? AND Course_code = ?";
+                        "FROM attendance WHERE Student_ID = ? AND Course_code = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -227,16 +227,20 @@ public class AttendanceDAO {
 
         String query =
                 "SELECT c.Course_code, c.Course_name, " +
-                "COUNT(a.Attendance_ID) AS Total_Sessions, " +
-                "COALESCE(SUM(a.Is_Present), 0) AS Attended_Sessions, " +
-                "COALESCE(ROUND(100.0 * SUM(a.Is_Present) / " +
-                "NULLIF(COUNT(a.Attendance_ID), 0), 2), 0) AS Attendance_Percentage " +
-                "FROM (SELECT DISTINCT Student_ID, Course_code FROM Enrollment) e " +
-                "JOIN Course c ON e.Course_code = c.Course_code " +
-                "LEFT JOIN Attendance a ON e.Student_ID = a.Student_ID " +
-                "AND e.Course_code = a.Course_code " +
-                "WHERE e.Student_ID = ? " +
-                "GROUP BY c.Course_code, c.Course_name";
+                        "COUNT(a.Attendance_ID) AS Total_Sessions, " +
+                        "SUM(CASE WHEN UPPER(a.Type) = 'THEORY' THEN 1 ELSE 0 END) AS Theory_Total, " +
+                        "SUM(CASE WHEN UPPER(a.Type) = 'THEORY' AND a.Is_Present = 1 THEN 1 ELSE 0 END) AS Theory_Attended, " +
+                        "SUM(CASE WHEN UPPER(a.Type) = 'PRACTICAL' THEN 1 ELSE 0 END) AS Practical_Total, " +
+                        "SUM(CASE WHEN UPPER(a.Type) = 'PRACTICAL' AND a.Is_Present = 1 THEN 1 ELSE 0 END) AS Practical_Attended, " +
+                        "COALESCE(SUM(a.Is_Present), 0) AS Attended_Sessions, " +
+                        "COALESCE(ROUND(100.0 * SUM(a.Is_Present) / " +
+                        "NULLIF(COUNT(a.Attendance_ID), 0), 2), 0) AS Attendance_Percentage " +
+                        "FROM (SELECT DISTINCT Student_ID, Course_code FROM Enrollment) e " +
+                        "JOIN Course c ON e.Course_code = c.Course_code " +
+                        "LEFT JOIN Attendance a ON e.Student_ID = a.Student_ID " +
+                        "AND e.Course_code = a.Course_code " +
+                        "WHERE e.Student_ID = ? " +
+                        "GROUP BY c.Course_code, c.Course_name";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
@@ -250,7 +254,11 @@ public class AttendanceDAO {
                             rs.getString("Course_name"),
                             rs.getInt("Total_Sessions"),
                             rs.getInt("Attended_Sessions"),
-                            rs.getDouble("Attendance_Percentage")
+                            rs.getDouble("Attendance_Percentage"),
+                            rs.getInt("Theory_Total"),
+                            rs.getInt("Theory_Attended"),
+                            rs.getInt("Practical_Total"),
+                            rs.getInt("Practical_Attended")
                     ));
                 }
             }
@@ -259,6 +267,48 @@ public class AttendanceDAO {
             e.printStackTrace();
         }
 
+        return list;
+    }
+
+    // Attendance adjusted with approved medical credits for eligibility only.
+    // Actual attendance methods remain unchanged.
+    public List<AttendanceRecord> getMedicalAdjustedAttendanceForStudent(int studentId) {
+        List<AttendanceRecord> list = new ArrayList<>();
+        String sql =
+                "SELECT c.Course_code, c.Course_name, " +
+                        "COUNT(a.Attendance_ID) AS Total_Sessions, " +
+                        "COALESCE(SUM(CASE WHEN a.Is_Present = 1 THEN 1 ELSE 0 END), 0) AS Attended_Sessions, " +
+                        "COALESCE(SUM(CASE WHEN UPPER(TRIM(a.Type)) = 'THEORY' THEN 1 ELSE 0 END), 0) AS Theory_Total, " +
+                        "COALESCE(SUM(CASE WHEN UPPER(TRIM(a.Type)) = 'PRACTICAL' THEN 1 ELSE 0 END), 0) AS Practical_Total, " +
+                        "COALESCE(SUM(CASE WHEN UPPER(TRIM(a.Type)) = 'THEORY' AND " +
+                        "(a.Is_Present = 1 OR EXISTS (SELECT 1 FROM medical m " +
+                        "WHERE m.Student_ID = a.Student_ID AND a.Session_date BETWEEN m.Start_date AND m.End_date " +
+                        "AND UPPER(TRIM(m.Approval_status)) = 'APPROVED')) THEN 1 ELSE 0 END), 0) AS Theory_Effective, " +
+                        "COALESCE(SUM(CASE WHEN UPPER(TRIM(a.Type)) = 'PRACTICAL' AND " +
+                        "(a.Is_Present = 1 OR EXISTS (SELECT 1 FROM medical m " +
+                        "WHERE m.Student_ID = a.Student_ID AND a.Session_date BETWEEN m.Start_date AND m.End_date " +
+                        "AND UPPER(TRIM(m.Approval_status)) = 'APPROVED')) THEN 1 ELSE 0 END), 0) AS Practical_Effective " +
+                        "FROM (SELECT DISTINCT Student_ID, Course_code FROM Enrollment) e " +
+                        "JOIN Course c ON e.Course_code = c.Course_code " +
+                        "LEFT JOIN attendance a ON a.Student_ID = e.Student_ID AND a.Course_code = e.Course_code " +
+                        "WHERE e.Student_ID = ? GROUP BY c.Course_code, c.Course_name";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int total = rs.getInt("Total_Sessions");
+                    int attended = rs.getInt("Attended_Sessions");
+                    list.add(new AttendanceRecord(
+                            rs.getString("Course_code"), rs.getString("Course_name"),
+                            total, attended, total == 0 ? 0.0 : 100.0 * attended / total,
+                            rs.getInt("Theory_Total"), rs.getInt("Theory_Effective"),
+                            rs.getInt("Practical_Total"), rs.getInt("Practical_Effective")));
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Unable to load medical-adjusted attendance", e);
+        }
         return list;
     }
 

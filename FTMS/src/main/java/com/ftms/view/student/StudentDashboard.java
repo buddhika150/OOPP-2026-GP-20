@@ -2,15 +2,20 @@
 package com.ftms.view.student;
 
 import com.ftms.dao.MarksDAO;
+import com.ftms.dao.AttendanceDAO;
 import com.ftms.view.LoginFrame;
 import com.ftms.model.GPA;
 import com.ftms.model.Marks;
+import com.ftms.model.AttendanceRecord;
 import com.ftms.model.Undergraduate;
 import com.ftms.util.SessionManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Locale;
 
 public class StudentDashboard extends JFrame {
 
@@ -95,6 +100,14 @@ public class StudentDashboard extends JFrame {
         MarksDAO dao = new MarksDAO();
         List<Marks> marks = dao.getMarksByStudentId(id);
 
+        // Attendance is checked separately for each course.
+        Map<String, AttendanceRecord> attendanceByCourse = new HashMap<>();
+        for (AttendanceRecord record : new AttendanceDAO().getMedicalAdjustedAttendanceForStudent(id)) {
+            if (record.getCourseCode() != null) {
+                attendanceByCourse.put(record.getCourseCode().trim().toUpperCase(Locale.ROOT), record);
+            }
+        }
+
         coursesPanel.loadCourses();
         attendancePanel.refreshAttendance();
         homePanel.refreshData();
@@ -117,7 +130,17 @@ public class StudentDashboard extends JFrame {
 
             total += m.getTotalMarks();
 
-            boolean courseEligible = m.viewMyEligibility();
+            AttendanceRecord attendance = m.getCourseCode() == null ? null :
+                    attendanceByCourse.get(m.getCourseCode().trim().toUpperCase(Locale.ROOT));
+            // Both attendance types must have recorded sessions and reach at least 80%.
+            double theoryPercentage = attendance == null ? 0.0 : attendance.getTheoryPercentage();
+            double practicalPercentage = attendance == null ? 0.0 : attendance.getPracticalPercentage();
+            boolean courseEligible = m.viewMyEligibility()
+                    && attendance != null
+                    && attendance.getTheoryTotal() > 0
+                    && attendance.getPracticalTotal() > 0
+                    && theoryPercentage >= 80.0
+                    && practicalPercentage >= 80.0;
             eligible &= courseEligible;
 
             gradesAndGpaPanel.getMarksTableModel().addRow(
@@ -136,7 +159,9 @@ public class StudentDashboard extends JFrame {
                             m.getCourseCode(),
                             m.getCourseName(),
                             m.getCaMarks(),
-                            "40.0",
+                            String.format("%.2f%%", theoryPercentage),
+                            String.format("%.2f%%", practicalPercentage),
+                            "CA >= 40; Theory >= 80%; Practical >= 80%",
                             courseEligible
                                     ? "ELIGIBLE"
                                     : "NOT ELIGIBLE"

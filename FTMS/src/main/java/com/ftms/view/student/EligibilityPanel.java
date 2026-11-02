@@ -30,7 +30,7 @@ public class EligibilityPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
 
         // Model Setup
-        String[] columns = {"Course Code", "Course Name", "CA Marks (Out of 100)", "Requirement", "CA Status"};
+        String[] columns = {"Course Code", "Course Name", "CA Marks (Out of 100)", "Theory Attendance", "Practical Attendance", "Requirement", "CA Status"};
         eligibilityTableModel = new DefaultTableModel(columns, 0);
 
         // Update cards dynamically when table model changes
@@ -43,16 +43,18 @@ public class EligibilityPanel extends JPanel {
             String code = String.valueOf(eligibilityTableModel.getValueAt(i, 0));
             String name = String.valueOf(eligibilityTableModel.getValueAt(i, 1));
             String marks = String.valueOf(eligibilityTableModel.getValueAt(i, 2));
-            String req = String.valueOf(eligibilityTableModel.getValueAt(i, 3));
-            String status = String.valueOf(eligibilityTableModel.getValueAt(i, 4));
+            String theory = String.valueOf(eligibilityTableModel.getValueAt(i, 3));
+            String practical = String.valueOf(eligibilityTableModel.getValueAt(i, 4));
+            String req = String.valueOf(eligibilityTableModel.getValueAt(i, 5));
+            String status = String.valueOf(eligibilityTableModel.getValueAt(i, 6));
 
-            cardsGridContainer.add(createEligibilityCard(code, name, marks, req, status));
+            cardsGridContainer.add(createEligibilityCard(code, name, marks, theory, practical, req, status));
         }
         cardsGridContainer.revalidate();
         cardsGridContainer.repaint();
     }
 
-    private JPanel createEligibilityCard(String code, String name, String marks, String req, String status) {
+    private JPanel createEligibilityCard(String code, String name, String marks, String theory, String practical, String req, String status) {
         JPanel card = new JPanel(new BorderLayout(10, 10));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -122,6 +124,14 @@ public class EligibilityPanel extends JPanel {
         details.add(Box.createVerticalGlue());
         details.add(lblObtained);
         details.add(lblPct);
+        JLabel lblAttendance = new JLabel("Theory: " + theory);
+        JLabel lblPractical = new JLabel("Practical: " + practical);
+        lblPractical.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblPractical.setForeground(new Color(100, 116, 139));
+        lblAttendance.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblAttendance.setForeground(new Color(100, 116, 139));
+        details.add(lblAttendance);
+        details.add(lblPractical);
         details.add(Box.createVerticalGlue());
 
         centerPanel.add(lblMarks);
