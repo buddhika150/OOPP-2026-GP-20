@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 
+import com.ftms.view.LoginFrame;
+
 
 
 
@@ -34,7 +36,7 @@ public class LecturerDashboard extends JFrame{
 private void setupWindow(){
 
         setTitle("Lecturer Dashboard");
-        setSize(800 , 500);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);            //open windo dispay center
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -116,7 +118,7 @@ private void setupWindow(){
         my_course_Button.addActionListener(e -> {
 
             new MyCourses(lectureId);       //lecutureta adal coures eak withrak penna nm meke id ek pss krnn oni
-        //    this.setVisible(false);   //no class only hide
+            this.setVisible(false);   //no class only hide
         });
 
 
@@ -141,6 +143,7 @@ private void setupWindow(){
         upload_matatial_Button.addActionListener(e -> {
 
             new CourseMaterials(lectureId);
+            this.setVisible(false);
 
         });
 
@@ -161,6 +164,7 @@ private void setupWindow(){
 
         upload_marks.addActionListener(e -> {
              new UploadMarks(lectureId);
+             this.setVisible(false);
         });
 
 
@@ -183,6 +187,7 @@ private void setupWindow(){
         attendance_summary.addActionListener(e -> {
 
           new LecturerAttendanceSummary(lectureId);
+          this.setVisible(false);
 
         });
 
@@ -204,6 +209,8 @@ private void setupWindow(){
         URL student_path = getClass().getResource("/images/Student_icon.png");
         ImageIcon student_path_icon = new ImageIcon(student_path);
         student_eligibility.setIcon(student_path_icon);
+
+
 
 
 
@@ -286,6 +293,7 @@ private  void CreaterSidebar(){
 
         dashbord_button.addActionListener( e -> {
             new LecturerDashboard(lectureId);
+            this.setVisible(false);
         });
 
 
@@ -319,6 +327,7 @@ private  void CreaterSidebar(){
 
         my_course_button.addActionListener(e -> {
             new MyCourses(lectureId);
+            this.setVisible(false);
         });
 
 
@@ -340,6 +349,7 @@ private  void CreaterSidebar(){
 
          course_material_button.addActionListener(e -> {
              new CourseMaterials(lectureId);
+             this.setVisible(false);
          });
 
 
@@ -361,6 +371,7 @@ private  void CreaterSidebar(){
 
     upload_marks_button.addActionListener(e -> {
         new UploadMarks(lectureId);
+        this.setVisible(false);
 
 
     });
@@ -384,6 +395,7 @@ private  void CreaterSidebar(){
 
     attendance_button.addActionListener(e -> {
         new LecturerAttendanceSummary(lectureId);
+        this.setVisible(false);
 
 
     });
@@ -392,8 +404,8 @@ private  void CreaterSidebar(){
 
     //Student Eligibility
 
-    JButton eligibility_button = new JButton("Attendance Summary");
-    sidebar.add(attendance_button);
+    JButton eligibility_button = new JButton("Student Eligibility");
+    sidebar.add(eligibility_button);
 
     eligibility_button.setPreferredSize(sidebar_button_size);
     eligibility_button.setBackground(sidebar_button_color);
@@ -408,6 +420,32 @@ private  void CreaterSidebar(){
 
     eligibility_button.addActionListener(e -> {
 
+        this.setVisible(false);
+
+
+    });
+
+
+    //Profile button
+
+    JButton  profile_button= new JButton("Profile");
+    sidebar.add(profile_button);
+
+    profile_button.setPreferredSize(sidebar_button_size);
+    profile_button.setBackground(sidebar_button_color);
+    profile_button.setForeground(Color.WHITE);
+
+    URL profile_image_path = getClass().getResource("/images/student_eligibility.png");
+    ImageIcon profile_icon = new ImageIcon(profile_image_path);
+    profile_button.setIcon(profile_icon);
+
+    profile_button.setHorizontalAlignment(SwingConstants.LEFT);
+    profile_button.setIconTextGap(15);
+
+    profile_button.addActionListener(e -> {
+
+        new LecturerProfile(lectureId);
+        this.setVisible(false);
 
 
     });
@@ -429,6 +467,18 @@ private  void CreaterSidebar(){
 
         logout_button.setHorizontalAlignment(SwingConstants.LEFT);
         logout_button.setIconTextGap(15);
+
+        logout_button.addActionListener(e -> {
+
+            // Open Login Frame
+            new LoginFrame().setVisible(true);
+
+            // Close Dashboard
+            this.dispose();
+
+        });
+
+
 
 
     }

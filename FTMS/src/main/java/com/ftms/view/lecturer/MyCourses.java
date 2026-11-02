@@ -2,6 +2,8 @@
 package com.ftms.view.lecturer;
 
 import com.ftms.database.DatabaseConnection;
+import com.ftms.view.LoginFrame;
+
 import javax.swing.table.DefaultTableModel;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,7 +41,7 @@ public class MyCourses extends JFrame{
 
 
         setTitle("My courses");
-        setSize(800 ,500);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10 , 10));
         getContentPane().setBackground(new Color(245, 249, 252));
@@ -205,6 +207,7 @@ public class MyCourses extends JFrame{
 
         dashbord_button.addActionListener( e -> {
             new LecturerDashboard(lectureId);
+            this.setVisible(false);
         });
 
 
@@ -238,6 +241,7 @@ public class MyCourses extends JFrame{
 
         my_course_button.addActionListener(e -> {
             new MyCourses(lectureId);
+            this.setVisible(false);
         });
 
 
@@ -259,6 +263,7 @@ public class MyCourses extends JFrame{
 
         course_material_button.addActionListener(e -> {
             new CourseMaterials(lectureId);
+            this.setVisible(false);
         });
 
 
@@ -280,6 +285,7 @@ public class MyCourses extends JFrame{
 
         upload_marks_button.addActionListener(e -> {
             new UploadMarks(lectureId);
+            this.setVisible(false);
 
 
         });
@@ -303,6 +309,7 @@ public class MyCourses extends JFrame{
 
         attendance_button.addActionListener(e -> {
             new LecturerAttendanceSummary(lectureId);
+            this.setVisible(false);
 
 
         });
@@ -311,8 +318,8 @@ public class MyCourses extends JFrame{
 
         //Student Eligibility
 
-        JButton eligibility_button = new JButton("Attendance Summary");
-        sidebar.add(attendance_button);
+        JButton eligibility_button = new JButton("Student Eligibility");
+        sidebar.add(eligibility_button);
 
         eligibility_button.setPreferredSize(sidebar_button_size);
         eligibility_button.setBackground(sidebar_button_color);
@@ -327,6 +334,32 @@ public class MyCourses extends JFrame{
 
         eligibility_button.addActionListener(e -> {
 
+            this.setVisible(false);
+
+
+        });
+
+
+        //Profile button
+
+        JButton  profile_button= new JButton("Profile");
+        sidebar.add(profile_button);
+
+        profile_button.setPreferredSize(sidebar_button_size);
+        profile_button.setBackground(sidebar_button_color);
+        profile_button.setForeground(Color.WHITE);
+
+        URL profile_image_path = getClass().getResource("/images/student_eligibility.png");
+        ImageIcon profile_icon = new ImageIcon(profile_image_path);
+        profile_button.setIcon(profile_icon);
+
+        profile_button.setHorizontalAlignment(SwingConstants.LEFT);
+        profile_button.setIconTextGap(15);
+
+        profile_button.addActionListener(e -> {
+
+            new LecturerProfile(lectureId);
+            this.setVisible(false);
 
 
         });
@@ -348,6 +381,18 @@ public class MyCourses extends JFrame{
 
         logout_button.setHorizontalAlignment(SwingConstants.LEFT);
         logout_button.setIconTextGap(15);
+
+        logout_button.addActionListener(e -> {
+
+            // Open Login Frame
+            new LoginFrame().setVisible(true);
+
+            // Close Dashboard
+            this.dispose();
+
+        });
+
+
 
 
     }
