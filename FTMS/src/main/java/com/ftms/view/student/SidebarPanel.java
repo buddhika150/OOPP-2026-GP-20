@@ -2,83 +2,144 @@ package com.ftms.view.student;
 
 import com.ftms.util.SessionManager;
 import com.ftms.view.LoginFrame;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class SidebarPanel extends JPanel {
-    public SidebarPanel(CardLayout cardLayout, JPanel mainContentPanel, JFrame parentFrame, ProfilePanel profilePanel, Runnable refreshDataCallback) {
+    private static final Color BACKGROUND = new Color(17, 30, 51);
+    private static final Color TEXT = new Color(205, 218, 234);
+    private static final Color MUTED = new Color(136, 156, 180);
+    private static final Color ACTIVE = new Color(42, 72, 113);
+    private static final Color HOVER = new Color(31, 53, 82);
+    private static final Color ACCENT = new Color(78, 170, 241);
+
+    private NavButton selectedButton;
+
+    public SidebarPanel(CardLayout cardLayout, JPanel mainContentPanel,
+                        JFrame parentFrame, ProfilePanel profilePanel,
+                        Runnable refreshDataCallback) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(new Color(20, 35, 60));
-        setPreferredSize(new Dimension(220, 700));
+        setBackground(BACKGROUND);
+        setPreferredSize(new Dimension(242, 700));
+        setBorder(BorderFactory.createEmptyBorder(26, 14, 18, 14));
 
-        JLabel lblTitle = new JLabel("  FTMS");
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 24));
-        lblTitle.setForeground(Color.WHITE);
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(25, 10, 5, 10));
-        add(lblTitle);
+        JLabel brand = new JLabel("FTMS");
+        brand.setFont(new Font("SansSerif", Font.BOLD, 28));
+        brand.setForeground(Color.WHITE);
+        brand.setAlignmentX(Component.LEFT_ALIGNMENT);
+        brand.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        add(brand);
 
-        JLabel lblSubtitle = new JLabel("  FACULTY MANAGEMENT");
-        lblSubtitle.setFont(new Font("Arial", Font.PLAIN, 10));
-        lblSubtitle.setForeground(new Color(170, 185, 205));
-        lblSubtitle.setBorder(BorderFactory.createEmptyBorder(0, 12, 25, 10));
-        add(lblSubtitle);
+        JLabel subtitle = new JLabel("FACULTY MANAGEMENT");
+        subtitle.setFont(new Font("SansSerif", Font.BOLD, 10));
+        subtitle.setForeground(MUTED);
+        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        subtitle.setBorder(BorderFactory.createEmptyBorder(3, 10, 0, 0));
+        add(subtitle);
+        add(Box.createVerticalStrut(38));
 
-        JButton btnDashboard = createSidebarButton("Dashboard");
-        JButton btnProfile = createSidebarButton("My Profile");
-        JButton btnCourses = createSidebarButton("My Courses");
-        JButton btnAttendance = createSidebarButton("My Attendance");
-        JButton btnEligibility = createSidebarButton("My Eligibility");
-        JButton btnGrades = createSidebarButton("My Grades & GPA");
-        JButton btnLogout = createSidebarButton("logout");
+        JLabel menuLabel = new JLabel("MAIN MENU");
+        menuLabel.setFont(new Font("SansSerif", Font.BOLD, 10));
+        menuLabel.setForeground(MUTED);
+        menuLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        menuLabel.setBorder(BorderFactory.createEmptyBorder(0, 12, 11, 0));
+        add(menuLabel);
 
-        btnDashboard.addActionListener(e -> cardLayout.show(mainContentPanel, "Dashboard"));
-        btnProfile.addActionListener(e -> {
-            cardLayout.show(mainContentPanel, "Profile");
-            profilePanel.updateProfileData();
-        });
-        btnCourses.addActionListener(e -> {
-            cardLayout.show(mainContentPanel, "Courses");
-            refreshDataCallback.run();
-        });
-        btnAttendance.addActionListener(e -> {
-            cardLayout.show(mainContentPanel, "Attendance");
-            refreshDataCallback.run();
-        });
-        btnEligibility.addActionListener(e -> {
-            cardLayout.show(mainContentPanel, "Eligibility");
-            refreshDataCallback.run();
-        });
-        btnGrades.addActionListener(e -> {
-            cardLayout.show(mainContentPanel, "Grades");
-            refreshDataCallback.run();
-        });
-        btnLogout.addActionListener(e -> {
+        NavButton dashboard = addNav("Dashboard", "Dashboard", cardLayout, mainContentPanel, null);
+        addNav("My Profile", "Profile", cardLayout, mainContentPanel, profilePanel::updateProfileData);
+        addNav("My Courses", "Courses", cardLayout, mainContentPanel, refreshDataCallback);
+        addNav("My Attendance", "Attendance", cardLayout, mainContentPanel, refreshDataCallback);
+        addNav("My Eligibility", "Eligibility", cardLayout, mainContentPanel, refreshDataCallback);
+        addNav("My Grades & GPA", "Grades", cardLayout, mainContentPanel, refreshDataCallback);
+        addNav("Submit Medical", "Medical", cardLayout, mainContentPanel, null);
+
+        setSelected(dashboard);
+        add(Box.createVerticalGlue());
+
+        JSeparator separator = new JSeparator();
+        separator.setForeground(new Color(51, 70, 95));
+        separator.setBackground(new Color(51, 70, 95));
+        separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        add(separator);
+        add(Box.createVerticalStrut(12));
+
+        NavButton logout = new NavButton("Log Out", true);
+        logout.addActionListener(e -> {
             SessionManager.getInstance().logout();
             parentFrame.dispose();
             new LoginFrame().setVisible(true);
         });
-
-        add(btnDashboard);
-        add(btnProfile);
-        add(btnCourses);
-        add(btnAttendance);
-        add(btnEligibility);
-        add(btnGrades);
-        add(Box.createVerticalGlue());
-        add(btnLogout);
-        add(Box.createRigidArea(new Dimension(0, 20)));
+        add(logout);
+        add(Box.createVerticalStrut(8));
     }
 
-    private JButton createSidebarButton(String text) {
-        JButton button = new JButton(text);
-        button.setMaximumSize(new Dimension(200, 42));
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setFocusPainted(false);
-        button.setBackground(new Color(30, 50, 85));
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("Arial", Font.BOLD, 12));
-        button.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
-        button.setHorizontalAlignment(SwingConstants.LEFT);
+    private NavButton addNav(String text, String card, CardLayout layout,
+                             JPanel content, Runnable afterNavigate) {
+        NavButton button = new NavButton(text, false);
+        button.addActionListener(e -> {
+            setSelected(button);
+            layout.show(content, card);
+            if (afterNavigate != null) afterNavigate.run();
+        });
+        add(button);
+        add(Box.createVerticalStrut(5));
         return button;
+    }
+
+    private void setSelected(NavButton button) {
+        if (selectedButton != null) {
+            selectedButton.selected = false;
+            selectedButton.repaint();
+        }
+        selectedButton = button;
+        button.selected = true;
+        button.repaint();
+    }
+
+    private static class NavButton extends JButton {
+        private boolean selected;
+        private boolean hovered;
+        private final boolean logout;
+
+        NavButton(String text, boolean logout) {
+            super(text);
+            this.logout = logout;
+            setAlignmentX(Component.LEFT_ALIGNMENT);
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, 43));
+            setPreferredSize(new Dimension(214, 43));
+            setMinimumSize(new Dimension(180, 43));
+            setFont(new Font("SansSerif", Font.BOLD, 12));
+            setHorizontalAlignment(SwingConstants.LEFT);
+            setBorder(BorderFactory.createEmptyBorder(0, 17, 0, 8));
+            setForeground(logout ? new Color(248, 164, 164) : TEXT);
+            setContentAreaFilled(false);
+            setFocusPainted(false);
+            setOpaque(false);
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            addMouseListener(new MouseAdapter() {
+                @Override public void mouseEntered(MouseEvent e) { hovered = true; repaint(); }
+                @Override public void mouseExited(MouseEvent e) { hovered = false; repaint(); }
+            });
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            Graphics2D g = (Graphics2D) graphics.create();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (selected || hovered) {
+                g.setColor(selected ? ACTIVE : HOVER);
+                g.fillRoundRect(0, 0, getWidth(), getHeight(), 13, 13);
+            }
+            if (selected) {
+                g.setColor(ACCENT);
+                g.fillRoundRect(0, 9, 4, getHeight() - 18, 4, 4);
+            }
+            g.dispose();
+            setForeground(logout ? new Color(248, 164, 164) : selected ? Color.WHITE : TEXT);
+            super.paintComponent(graphics);
+        }
     }
 }
