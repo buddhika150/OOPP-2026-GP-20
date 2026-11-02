@@ -3,26 +3,32 @@ package com.ftms.dao;
 
 import com.ftms.database.DatabaseConnection;
 import com.ftms.util.SessionManager;
+import com.ftms.util.PasswordUtil;
+
 import java.sql.*;
+import java.util.Arrays;
 
 public class LoginDAO {
 
     public String login(String username, String password) {
 
-        String sql = "SELECT User_ID, Role FROM `User` " +
-                "WHERE Username = ? AND Password = ?";
+        String sql = "SELECT User_ID, Role, Password " +
+                "FROM `user` WHERE Username=?";
 
         SessionManager.getInstance().logout();
 
+        char[] input = password.toCharArray();
+
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            pst.setString(1, username);
-            pst.setString(2, password);
+            ps.setString(1, username);
 
-            try (ResultSet rs = pst.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
 
-                if (rs.next()) {
+                if (rs.next() &&
+                        PasswordUtil.verify(
+                                input, rs.getString("Password"))) {
 
                     int userId = rs.getInt("User_ID");
                     String role = rs.getString("Role");
@@ -34,8 +40,10 @@ public class LoginDAO {
                 }
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            Arrays.fill(input, '\0');
         }
 
         return null;

@@ -28,6 +28,7 @@ public class CourseManagement extends JFrame {
     public CourseManagement() {
         setTitle("FTMS - Course Management");
         setSize(1100, 650);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 

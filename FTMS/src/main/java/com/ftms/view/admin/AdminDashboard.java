@@ -83,13 +83,15 @@ public class AdminDashboard extends JFrame {
         JButton coursesBtn = sideButton("Manage Courses", false);
         JButton noticesBtn = sideButton("Manage Notices", false);
         JButton timetableBtn = sideButton("Timetable", false);
+        JButton profileBtn = sideButton("My Profile", false);
 
         JButton[] buttons = {
                 dashboardBtn,
                 usersBtn,
                 coursesBtn,
                 noticesBtn,
-                timetableBtn
+                timetableBtn,
+                profileBtn
         };
 
         for (JButton btn : buttons) {
@@ -255,6 +257,7 @@ public class AdminDashboard extends JFrame {
         coursesCard.addActionListener(e -> openPage(new CourseManagement()));
         noticesCard.addActionListener(e -> openPage(new NoticeManagement()));
         timetableCard.addActionListener(e -> openPage(new TimetableManagement()));
+        profileBtn.addActionListener(e -> openPage(new AdminProfile()));
 
         // LOGOUT
         logout.addActionListener(e -> openPage(new LoginFrame()));

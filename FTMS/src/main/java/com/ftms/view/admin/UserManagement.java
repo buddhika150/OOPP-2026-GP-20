@@ -29,6 +29,7 @@ public class UserManagement extends JFrame {
     public UserManagement() {
         setTitle("FTMS - User Management");
         setSize(1100, 680);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setMinimumSize(new Dimension(900, 550));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
