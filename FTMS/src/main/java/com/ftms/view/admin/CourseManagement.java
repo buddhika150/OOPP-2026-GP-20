@@ -14,6 +14,7 @@ public class CourseManagement extends JFrame {
     Color bg = new Color(237, 243, 248);
 
     CourseDAO dao = new CourseDAO();
+
     JTable table;
     DefaultTableModel model;
     JLabel total;
@@ -25,6 +26,7 @@ public class CourseManagement extends JFrame {
     };
 
     public CourseManagement() {
+
         setTitle("FTMS - Course Management");
         setSize(1100, 650);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -47,6 +49,7 @@ public class CourseManagement extends JFrame {
         titleBox.add(title);
 
         JButton back = button("Dashboard", navy);
+
         back.addActionListener(e -> {
             dispose();
             new AdminDashboard();
@@ -56,6 +59,7 @@ public class CourseManagement extends JFrame {
         header.setOpaque(false);
         header.add(titleBox, BorderLayout.WEST);
         header.add(back, BorderLayout.EAST);
+
         main.add(header, BorderLayout.NORTH);
 
         // CONTENT
@@ -73,16 +77,22 @@ public class CourseManagement extends JFrame {
         JButton addButton = button("+ Add Course", teal);
         addButton.addActionListener(e -> courseForm(false));
 
+        // ASSIGN LECTURER BUTTON
+        JButton assignButton = button("Assign Lecturer", navy);
+        assignButton.addActionListener(e -> assignLecturer());
+
         JPanel tools = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         tools.setOpaque(false);
         tools.add(new CourseIcon("search"));
         tools.add(search);
+        tools.add(assignButton);
         tools.add(addButton);
 
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
         top.add(total, BorderLayout.WEST);
         top.add(tools, BorderLayout.EAST);
+
         content.add(top, BorderLayout.NORTH);
 
         // TABLE
@@ -121,6 +131,7 @@ public class CourseManagement extends JFrame {
         actions.setOpaque(false);
         actions.add(edit);
         actions.add(delete);
+
         content.add(actions, BorderLayout.SOUTH);
 
         main.add(content, BorderLayout.CENTER);
@@ -128,21 +139,31 @@ public class CourseManagement extends JFrame {
         // SEARCH
         TableRowSorter<DefaultTableModel> sorter =
                 new TableRowSorter<>(model);
+
         table.setRowSorter(sorter);
 
         search.getDocument().addDocumentListener(
                 new javax.swing.event.DocumentListener() {
-                    public void insertUpdate(javax.swing.event.DocumentEvent e) {
+
+                    public void insertUpdate(
+                            javax.swing.event.DocumentEvent e) {
                         filter();
                     }
-                    public void removeUpdate(javax.swing.event.DocumentEvent e) {
+
+                    public void removeUpdate(
+                            javax.swing.event.DocumentEvent e) {
                         filter();
                     }
-                    public void changedUpdate(javax.swing.event.DocumentEvent e) {
+
+                    public void changedUpdate(
+                            javax.swing.event.DocumentEvent e) {
                         filter();
                     }
+
                     void filter() {
+
                         String text = search.getText().trim();
+
                         sorter.setRowFilter(text.isEmpty() ? null :
                                 RowFilter.regexFilter(
                                         "(?i)" + Pattern.quote(text), 0, 1));
@@ -151,17 +172,23 @@ public class CourseManagement extends JFrame {
         );
 
         loadCourses();
+
         setVisible(true);
     }
 
-    // MYSQL COURSES
+    // LOAD COURSES
     void loadCourses() {
+
         try {
+
             model.setRowCount(0);
+
             for (Object[] course : dao.getAllCourses()) {
                 model.addRow(course);
             }
+
             total.setText("Total Courses: " + model.getRowCount());
+
         } catch (SQLException e) {
             error(e);
         }
@@ -169,6 +196,7 @@ public class CourseManagement extends JFrame {
 
     // ADD / EDIT COURSE
     void courseForm(boolean editing) {
+
         int row = table.getSelectedRow();
 
         if (editing && row == -1) {
@@ -176,39 +204,55 @@ public class CourseManagement extends JFrame {
             return;
         }
 
-        if (editing) row = table.convertRowIndexToModel(row);
+        if (editing) {
+            row = table.convertRowIndexToModel(row);
+        }
 
         JTextField[] fields = new JTextField[8];
+
         JPanel form = new JPanel(new GridLayout(9, 2, 10, 10));
 
         for (int i = 0; i < 8; i++) {
+
             fields[i] = new JTextField(18);
+
             form.add(new JLabel(columns[i] + ":"));
             form.add(fields[i]);
 
             if (editing) {
-                fields[i].setText(String.valueOf(model.getValueAt(row, i)));
+                fields[i].setText(
+                        String.valueOf(model.getValueAt(row, i)));
             }
         }
 
-        if (editing) fields[0].setEditable(false);
+        if (editing) {
+            fields[0].setEditable(false);
+        }
 
         JComboBox<String> department = new JComboBox<>(
                 new String[]{"ICT", "ET", "BST"});
+
         if (editing) {
-            department.setSelectedItem(String.valueOf(model.getValueAt(row, 8)));
+            department.setSelectedItem(
+                    String.valueOf(model.getValueAt(row, 8)));
         }
+
         form.add(new JLabel("Department:"));
         form.add(department);
 
         int result = JOptionPane.showConfirmDialog(
-                this, form,
+                this,
+                form,
                 editing ? "Edit Course" : "Add Course",
-                JOptionPane.OK_CANCEL_OPTION);
+                JOptionPane.OK_CANCEL_OPTION
+        );
 
-        if (result != JOptionPane.OK_OPTION) return;
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
 
         try {
+
             String code = fields[0].getText().trim();
             String name = fields[1].getText().trim();
 
@@ -224,36 +268,160 @@ public class CourseManagement extends JFrame {
             int pc = Integer.parseInt(fields[5].getText().trim());
             int th = Integer.parseInt(fields[6].getText().trim());
             int ph = Integer.parseInt(fields[7].getText().trim());
-            String departmentValue = (String) department.getSelectedItem();
+
+            String departmentValue =
+                    (String) department.getSelectedItem();
 
             if (year < 1 || sem < 1 || sem > 2 ||
                     tc < 0 || pc < 0 || th < 0 || ph < 0) {
+
                 JOptionPane.showMessageDialog(this,
                         "Enter valid course details");
                 return;
             }
 
             if (editing) {
-                dao.updateCourse(code, name, year, sem, tc, pc, th, ph,
-                        departmentValue);
+
+                dao.updateCourse(code, name, year, sem,
+                        tc, pc, th, ph, departmentValue);
+
             } else {
-                dao.addCourse(code, name, year, sem, tc, pc, th, ph,
-                        departmentValue);
+
+                dao.addCourse(code, name, year, sem,
+                        tc, pc, th, ph, departmentValue);
             }
 
             loadCourses();
+
             JOptionPane.showMessageDialog(this,
                     editing ? "Course updated!" : "Course added!");
 
         } catch (NumberFormatException e) {
+
             JOptionPane.showMessageDialog(this, "Enter valid numbers");
+
         } catch (SQLException e) {
+
             error(e);
+        }
+    }
+
+    // ASSIGN LECTURER TO COURSE
+    void assignLecturer() {
+
+        JComboBox<String> department = new JComboBox<>(
+                new String[]{"ICT", "ET", "BST"});
+
+        JComboBox<String> lecturer = new JComboBox<>();
+        JComboBox<String> course = new JComboBox<>();
+
+        JPanel form = new JPanel(new GridLayout(3, 2, 10, 12));
+
+        form.add(new JLabel("Department:"));
+        form.add(department);
+
+        form.add(new JLabel("Lecturer ID:"));
+        form.add(lecturer);
+
+        form.add(new JLabel("Course Code:"));
+        form.add(course);
+
+        // LOAD LECTURERS AND COURSES
+        Runnable loadOptions = () -> {
+
+            try {
+
+                String selectedDepartment =
+                        department.getSelectedItem().toString();
+
+                lecturer.removeAllItems();
+                course.removeAllItems();
+
+                for (String id :
+                        dao.getLecturersByDepartment(selectedDepartment)) {
+
+                    lecturer.addItem(id);
+                }
+
+                for (String code :
+                        dao.getCourseCodesByDepartment(selectedDepartment)) {
+
+                    course.addItem(code);
+                }
+
+            } catch (SQLException e) {
+                error(e);
+            }
+        };
+
+        department.addActionListener(e -> loadOptions.run());
+
+        loadOptions.run();
+
+        if (lecturer.getItemCount() == 0 ||
+                course.getItemCount() == 0) {
+
+            JOptionPane.showMessageDialog(this,
+                    "No lecturers or courses available for this department.");
+
+            return;
+        }
+
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                form,
+                "Assign Lecturer to Course",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        try {
+
+            if (lecturer.getSelectedItem() == null ||
+                    course.getSelectedItem() == null) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Select a lecturer and course first.");
+                return;
+            }
+
+            int lecturerId = Integer.parseInt(
+                    lecturer.getSelectedItem().toString());
+
+            String courseCode =
+                    course.getSelectedItem().toString();
+
+            dao.assignLecturerToCourse(lecturerId, courseCode);
+
+            JOptionPane.showMessageDialog(this,
+                    "Lecturer assigned to course successfully!");
+
+        } catch (SQLException e) {
+
+            if (e.getMessage() != null &&
+                    e.getMessage().toLowerCase().contains("duplicate")) {
+
+                JOptionPane.showMessageDialog(this,
+                        "This lecturer is already assigned to this course.");
+
+            } else {
+                error(e);
+            }
+
+        } catch (NumberFormatException e) {
+
+            JOptionPane.showMessageDialog(this,
+                    "Invalid Lecturer ID.");
         }
     }
 
     // DELETE COURSE
     void deleteCourse() {
+
         int row = table.getSelectedRow();
 
         if (row == -1) {
@@ -262,75 +430,110 @@ public class CourseManagement extends JFrame {
         }
 
         row = table.convertRowIndexToModel(row);
+
         String code = model.getValueAt(row, 0).toString();
 
         int confirm = JOptionPane.showConfirmDialog(
-                this, "Delete " + code + "?",
-                "Confirm Delete", JOptionPane.YES_NO_OPTION
+                this,
+                "Delete " + code + "?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION
         );
 
-        if (confirm != JOptionPane.YES_OPTION) return;
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
 
         try {
+
             dao.deleteCourse(code);
+
             loadCourses();
+
             JOptionPane.showMessageDialog(this, "Course deleted!");
+
         } catch (SQLException e) {
             error(e);
         }
     }
 
+    // BUTTON DESIGN
     JButton button(String text, Color color) {
+
         JButton b = new JButton(text);
+
         b.setBackground(color);
         b.setForeground(Color.WHITE);
         b.setFont(new Font("Arial", Font.BOLD, 13));
         b.setFocusPainted(false);
         b.setBorderPainted(false);
         b.setBorder(BorderFactory.createEmptyBorder(11, 16, 11, 16));
+
         return b;
     }
 
+    // ERROR MESSAGE
     void error(SQLException e) {
+
         JOptionPane.showMessageDialog(this,
                 "Database error:\n" + e.getMessage());
     }
 
     // DRAW ICONS
     class CourseIcon extends JComponent implements Icon {
+
         String type;
 
         CourseIcon(String type) {
+
             this.type = type;
             setPreferredSize(new Dimension(30, 30));
         }
 
-        public int getIconWidth() { return 24; }
-        public int getIconHeight() { return 24; }
+        public int getIconWidth() {
+            return 24;
+        }
+
+        public int getIconHeight() {
+            return 24;
+        }
 
         public void paintIcon(Component c, Graphics g, int x, int y) {
+
             Graphics2D d = (Graphics2D) g.create();
+
             d.translate(x, y);
+
             d.setColor(c instanceof JButton ? Color.WHITE : teal);
+
             d.setStroke(new BasicStroke(2.2f));
+
             d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
             if (type.equals("book")) {
+
                 d.drawRect(3, 3, 18, 18);
                 d.drawLine(12, 3, 12, 21);
+
             } else if (type.equals("search")) {
+
                 d.drawOval(2, 2, 14, 14);
                 d.drawLine(15, 16, 22, 23);
+
             } else if (type.equals("edit")) {
+
                 d.drawLine(4, 19, 18, 5);
                 d.drawLine(7, 21, 21, 7);
                 d.drawLine(4, 19, 7, 21);
+
             } else if (type.equals("delete")) {
+
                 d.drawRect(6, 7, 12, 14);
                 d.drawLine(4, 5, 20, 5);
                 d.drawLine(9, 3, 15, 3);
             }
+
             d.dispose();
         }
 
@@ -340,6 +543,7 @@ public class CourseManagement extends JFrame {
     }
 
     public static void main(String[] args) {
+
         SwingUtilities.invokeLater(CourseManagement::new);
     }
 }
