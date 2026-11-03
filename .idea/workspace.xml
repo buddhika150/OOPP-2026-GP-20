@@ -5,10 +5,83 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="490e048a-ec9b-4819-96f8-1a872c120d63" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/FTMS/database/database.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/AdminDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/CourseDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/LoginDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/MarksDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/NoticeDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/StudentProfileDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/TimetableDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/UserDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/database/DatabaseTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Add_course_material.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Admin.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/AttendanceRecord.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Course.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/CourseMaterial.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/GPA.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Lecturer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Marks.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Notice.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Timetable.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Undergraduate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/util/PasswordUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/util/SessionManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/LoginFrame.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/admin/AdminDashboard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/admin/AdminProfile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/admin/CourseManagement.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/admin/NoticeManagement.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/admin/TimetableManagement.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/admin/UserManagement.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/lecturer/CourseMaterials.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/lecturer/LecturerAttendanceSummary.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/lecturer/LecturerDashboard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/lecturer/LecturerProfile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/lecturer/MyCourses.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/lecturer/UploadMarks.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/student/AttendancePanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/student/CoursesPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/student/DashboardHomePanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/student/EligibilityPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/student/GradesAndGpaPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/student/MedicalSubmissionPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/student/ProfilePanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/student/SidebarPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/student/StudentDashboard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/Student_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/atendance_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/attendance_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/attendance_summary.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/book.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/corse_upload_image.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/file.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/graduated.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/header_image.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/house.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/logout.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/manae_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/mycourse_image.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/plus.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/student_eligibility.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/upload_button_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/upload_marks.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FTMS/src/main/resources/images/upload_metarial_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FTMS/database/schema.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FTMS/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/AttendanceDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/AttendanceDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/technicalofficer/AddMedicalPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/technicalofficer/AddMedicalPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/MedicalDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/dao/MedicalDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/database/DatabaseConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/database/DatabaseConnection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Medical.java" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/Medical.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/model/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/technicalofficer/AttendanceSummaryPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/technicalofficer/AttendanceSummaryPanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/technicalofficer/TechnicalOfficerDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/FTMS/src/main/java/com/ftms/view/technicalofficer/TechnicalOfficerDashboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FTMS/src/main/resources/images/.gitkeep" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,25 +112,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Maven.FTMS [compile].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;TG/2024/2112(new)&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Asus/Desktop/OOPP-2026-GP-20&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "Maven.FTMS [compile].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "Merging TG/2024/2112(new)",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Asus/Desktop/OOPP-2026-GP-20",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

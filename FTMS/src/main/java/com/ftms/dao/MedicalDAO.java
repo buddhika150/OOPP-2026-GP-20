@@ -184,6 +184,24 @@ public class MedicalDAO {
         return false;
     }
 
+    // Student deletion: ownership and pending approval are enforced in SQL.
+    // Staff's existing deleteMedical(int) remains unchanged.
+    public boolean deletePendingMedicalForStudent(int medicalId, int studentId) {
+        String sql = "DELETE FROM medical WHERE Medical_ID = ? AND Student_ID = ? " +
+                "AND UPPER(Approval_status) = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, medicalId);
+            ps.setInt(2, studentId);
+            ps.setString(3, Medical.APPROVAL_PENDING);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // Helper method to convert ResultSet row to Medical object
     private Medical mapRow(ResultSet rs) throws SQLException {
         int rawAttId = rs.getInt("Attendance_ID");

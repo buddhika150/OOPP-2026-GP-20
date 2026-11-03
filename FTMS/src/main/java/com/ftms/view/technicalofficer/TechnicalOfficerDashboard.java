@@ -2,7 +2,8 @@ package com.ftms.view.technicalofficer;
 
 import com.ftms.dao.AttendanceDAO;
 import com.ftms.model.TechnicalOfficer;
-
+import com.ftms.dao.TimetableDAO;
+import java.sql.SQLException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -18,12 +19,16 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+
 /**
  * Main Swing Dashboard for Member 3 (Technical Officer).
  * Matches the uploaded FTMS UI theme and provides navigation across
  * Dashboard, My Profile, Attendance, Attendance Summary, Medical Records,
  * Medical Approval, Notices, and Timetable.
  */
+
+
+
 public class TechnicalOfficerDashboard extends JFrame {
 
     // Theme palette matching the reference screenshot
@@ -755,8 +760,33 @@ public class TechnicalOfficerDashboard extends JFrame {
                 return false;
             }
         };
-        model.addRow(new Object[]{1, "Welcome to FTMS", "Check your timetable and courses.", "2026-09-01"});
-        model.addRow(new Object[]{2, "CA assessment", "CA marks and eligibility can be checked in FTMS.", "2026-09-15"});
+
+        try {
+            String sql = "SELECT * FROM Notice";
+
+            try (java.sql.Connection con =
+                         com.ftms.database.DatabaseConnection.getConnection();
+                 java.sql.PreparedStatement ps = con.prepareStatement(sql);
+                 java.sql.ResultSet rs = ps.executeQuery()) {
+
+                model.setRowCount(0);
+
+                while (rs.next()) {
+                    model.addRow(new Object[]{
+                            rs.getInt(1),
+                            rs.getString(2),
+                            rs.getString(3),
+                            rs.getString(4)
+                    });
+                }
+            }
+
+        } catch (java.sql.SQLException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Error loading notices: " + ex.getMessage()
+            );
+        }
 
         JTable table = new JTable(model);
         styleBasicTable(table);
@@ -793,10 +823,22 @@ public class TechnicalOfficerDashboard extends JFrame {
                 return false;
             }
         };
-        model.addRow(new Object[]{1, "ICT2132", "ICT", "Monday", "08:00-10:00"});
-        model.addRow(new Object[]{2, "ICT2142", "ICT", "Tuesday", "10:00-12:00"});
-        model.addRow(new Object[]{3, "ICT2152", "ICT", "Wednesday", "13:00-15:00"});
-        model.addRow(new Object[]{4, "ICT2162", "ICT", "Thursday", "09:00-11:00"});
+
+        try {
+            TimetableDAO dao = new TimetableDAO();
+
+            model.setRowCount(0);
+
+            for (Object[] row : dao.getAll()) {
+                model.addRow(row);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Error loading timetable: " + ex.getMessage()
+            );
+        }
 
         JTable table = new JTable(model);
         styleBasicTable(table);
