@@ -29,6 +29,35 @@ public class TimetableDAO {
         }
         return rows;
     }
+        public List<Object[]> getByDepartment(String department) throws SQLException {
+            List<Object[]> rows = new ArrayList<>();
+
+            String sql = "SELECT * FROM timetable " +
+                    "WHERE LOWER(TRIM(Department)) = LOWER(TRIM(?)) " +
+                    "ORDER BY Timetable_ID DESC";
+
+            try (Connection con = DatabaseConnection.getConnection();
+                 PreparedStatement ps = con.prepareStatement(sql)) {
+
+                ps.setString(1, department);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        rows.add(new Object[]{
+                                rs.getInt("Timetable_ID"),
+                                rs.getString("Course_code"),
+                                rs.getString("Department"),
+                                rs.getString("Day"),
+                                rs.getString("Time_slot")
+                        });
+                    }
+                }
+            }
+
+            return rows;
+        }
+
+
 
     public List<String> getCourses() throws SQLException {
         List<String> courses = new ArrayList<>();
@@ -96,3 +125,4 @@ public class TimetableDAO {
         }
     }
 }
+

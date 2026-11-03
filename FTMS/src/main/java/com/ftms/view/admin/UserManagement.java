@@ -340,6 +340,8 @@ public class UserManagement extends JFrame {
         JComboBox<String> role = new JComboBox<>(
                 new String[]{"ADMIN", "LECTURER",
                         "STUDENT", "TECHNICAL_OFFICER"});
+        JComboBox<String> department = new JComboBox<>(
+                new String[]{"ICT", "ET", "BST"});
 
         int id = -1;
 
@@ -357,11 +359,13 @@ public class UserManagement extends JFrame {
             if (names.length > 1) lname.setText(names[1]);
         }
 
-        JPanel form = new JPanel(new GridLayout(7, 2, 10, 12));
+        JPanel form = new JPanel(new GridLayout(8, 2, 10, 12));
         form.setBorder(new EmptyBorder(12, 10, 12, 10));
 
         form.add(new JLabel("Username:"));
         form.add(username);
+        form.add(new JLabel("Department:"));
+        form.add(department);
         form.add(new JLabel("First Name:"));
         form.add(fname);
         form.add(new JLabel("Last Name:"));
@@ -390,6 +394,9 @@ public class UserManagement extends JFrame {
         String phoneValue = phone.getText().trim();
         String passwordValue = new String(password.getPassword());
         String roleValue = role.getSelectedItem().toString();
+        String departmentValue = "ADMIN".equals(roleValue)
+                ? null
+                : department.getSelectedItem().toString();
 
         if (userValue.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Username is required.");
@@ -410,10 +417,12 @@ public class UserManagement extends JFrame {
         try {
             if (editing) {
                 dao.updateUser(id, userValue, firstValue, lastValue,
-                        roleValue, emailValue, phoneValue, passwordValue);
+                        roleValue, emailValue, phoneValue,
+                        passwordValue, departmentValue);
             } else {
                 dao.addUser(userValue, passwordValue, firstValue,
-                        lastValue, roleValue, emailValue, phoneValue);
+                        lastValue, roleValue, emailValue,
+                        phoneValue, departmentValue);
             }
 
             loadUsers();

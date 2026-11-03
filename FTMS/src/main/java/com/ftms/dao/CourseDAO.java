@@ -1,6 +1,5 @@
 package com.ftms.dao;
 
-
 import com.ftms.database.DatabaseConnection;
 import java.sql.*;
 import java.util.*;
@@ -25,7 +24,8 @@ public class CourseDAO {
                         rs.getInt("Theory_credits"),
                         rs.getInt("Practical_credits"),
                         rs.getInt("Theory_hours"),
-                        rs.getInt("Practical_hours")
+                        rs.getInt("Practical_hours"),
+                        rs.getString("Department")
                 });
             }
         }
@@ -34,9 +34,12 @@ public class CourseDAO {
 
     public void addCourse(String code, String name, int year,
                           int semester, int tc, int pc,
-                          int th, int ph) throws SQLException {
+                          int th, int ph, String department) throws SQLException {
 
-        String sql = "INSERT INTO course VALUES (?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO course " +
+                "(Course_code, Course_name, Academic_year, Semester, " +
+                "Theory_credits, Practical_credits, Theory_hours, " +
+                "Practical_hours, Department) VALUES (?,?,?,?,?,?,?,?,?)";
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -49,17 +52,19 @@ public class CourseDAO {
             ps.setInt(6, pc);
             ps.setInt(7, th);
             ps.setInt(8, ph);
+            ps.setString(9, department);
             ps.executeUpdate();
         }
     }
 
     public void updateCourse(String code, String name, int year,
                              int semester, int tc, int pc,
-                             int th, int ph) throws SQLException {
+                             int th, int ph, String department) throws SQLException {
 
         String sql = "UPDATE course SET Course_name=?, Academic_year=?, " +
                 "Semester=?, Theory_credits=?, Practical_credits=?, " +
-                "Theory_hours=?, Practical_hours=? WHERE Course_code=?";
+                "Theory_hours=?, Practical_hours=?, Department=? " +
+                "WHERE Course_code=?";
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -71,7 +76,8 @@ public class CourseDAO {
             ps.setInt(5, pc);
             ps.setInt(6, th);
             ps.setInt(7, ph);
-            ps.setString(8, code);
+            ps.setString(8, department);
+            ps.setString(9, code);
             ps.executeUpdate();
         }
     }
@@ -85,11 +91,9 @@ public class CourseDAO {
             ps.setString(1, code);
             ps.executeUpdate();
         }
-
     }
 
     public List<String[]> getCoursesByStudentId(int studentId) {
-
         List<String[]> courses = new ArrayList<>();
 
         String sql =
@@ -112,12 +116,10 @@ public class CourseDAO {
                     });
                 }
             }
-
         } catch (SQLException e) {
             System.err.println("Error loading student courses: " + e.getMessage());
             e.printStackTrace();
         }
-
         return courses;
     }
 }

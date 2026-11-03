@@ -800,7 +800,9 @@ public class TechnicalOfficerDashboard extends JFrame {
                 new EmptyBorder(18, 22, 18, 22)
         ));
 
-        JLabel lblHeading = new JLabel("Department Course Timetable (ICT)");
+        JLabel lblHeading = new JLabel(
+                "Department Course Timetable (" + currentOfficer.getDepartment() + ")"
+        );
         lblHeading.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblHeading.setForeground(NAVY_DARK);
         card.add(lblHeading, BorderLayout.NORTH);
@@ -816,9 +818,7 @@ public class TechnicalOfficerDashboard extends JFrame {
         try {
             TimetableDAO dao = new TimetableDAO();
 
-            model.setRowCount(0);
-
-            for (Object[] row : dao.getAll()) {
+            for (Object[] row : dao.getByDepartment(currentOfficer.getDepartment())) {
                 model.addRow(row);
             }
 

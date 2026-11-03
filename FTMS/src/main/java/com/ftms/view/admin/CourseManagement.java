@@ -1,4 +1,3 @@
-
 package com.ftms.view.admin;
 
 import com.ftms.dao.CourseDAO;
@@ -22,7 +21,7 @@ public class CourseManagement extends JFrame {
     String[] columns = {
             "Code", "Course Name", "Year", "Semester",
             "Theory Credits", "Practical Credits",
-            "Theory Hours", "Practical Hours"
+            "Theory Hours", "Practical Hours", "Department"
     };
 
     public CourseManagement() {
@@ -180,7 +179,7 @@ public class CourseManagement extends JFrame {
         if (editing) row = table.convertRowIndexToModel(row);
 
         JTextField[] fields = new JTextField[8];
-        JPanel form = new JPanel(new GridLayout(8, 2, 10, 10));
+        JPanel form = new JPanel(new GridLayout(9, 2, 10, 10));
 
         for (int i = 0; i < 8; i++) {
             fields[i] = new JTextField(18);
@@ -188,18 +187,24 @@ public class CourseManagement extends JFrame {
             form.add(fields[i]);
 
             if (editing) {
-                fields[i].setText(
-                        String.valueOf(model.getValueAt(row, i)));
+                fields[i].setText(String.valueOf(model.getValueAt(row, i)));
             }
         }
 
         if (editing) fields[0].setEditable(false);
 
+        JComboBox<String> department = new JComboBox<>(
+                new String[]{"ICT", "ET", "BST"});
+        if (editing) {
+            department.setSelectedItem(String.valueOf(model.getValueAt(row, 8)));
+        }
+        form.add(new JLabel("Department:"));
+        form.add(department);
+
         int result = JOptionPane.showConfirmDialog(
                 this, form,
                 editing ? "Edit Course" : "Add Course",
-                JOptionPane.OK_CANCEL_OPTION
-        );
+                JOptionPane.OK_CANCEL_OPTION);
 
         if (result != JOptionPane.OK_OPTION) return;
 
@@ -219,6 +224,7 @@ public class CourseManagement extends JFrame {
             int pc = Integer.parseInt(fields[5].getText().trim());
             int th = Integer.parseInt(fields[6].getText().trim());
             int ph = Integer.parseInt(fields[7].getText().trim());
+            String departmentValue = (String) department.getSelectedItem();
 
             if (year < 1 || sem < 1 || sem > 2 ||
                     tc < 0 || pc < 0 || th < 0 || ph < 0) {
@@ -228,9 +234,11 @@ public class CourseManagement extends JFrame {
             }
 
             if (editing) {
-                dao.updateCourse(code, name, year, sem, tc, pc, th, ph);
+                dao.updateCourse(code, name, year, sem, tc, pc, th, ph,
+                        departmentValue);
             } else {
-                dao.addCourse(code, name, year, sem, tc, pc, th, ph);
+                dao.addCourse(code, name, year, sem, tc, pc, th, ph,
+                        departmentValue);
             }
 
             loadCourses();
@@ -238,8 +246,7 @@ public class CourseManagement extends JFrame {
                     editing ? "Course updated!" : "Course added!");
 
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this,
-                    "Enter valid numbers");
+            JOptionPane.showMessageDialog(this, "Enter valid numbers");
         } catch (SQLException e) {
             error(e);
         }
