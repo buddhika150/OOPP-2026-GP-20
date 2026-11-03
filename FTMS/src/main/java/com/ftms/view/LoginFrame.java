@@ -214,13 +214,28 @@ public class LoginFrame extends JFrame {
                     studentDashboard.setVisible(true);
                     dispose();
                     break;
-                case "technical_officer":
+                case "technical_officer": {
+                    com.ftms.dao.AttendanceDAO officerDAO =
+                            new com.ftms.dao.AttendanceDAO();
+
+                    com.ftms.model.TechnicalOfficer officer =
+                            officerDAO.getTechnicalOfficerProfile(0, username);
+
+                    if (officer == null) {
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Technical Officer profile not found: " + username
+                        );
+                        break;
+                    }
+
                     TechnicalOfficerDashboard technicalDashboard =
-                            new TechnicalOfficerDashboard();
+                            new TechnicalOfficerDashboard(officer);
 
                     technicalDashboard.setVisible(true);
                     dispose();
                     break;
+                }
 
 
                 case "lecturer": {

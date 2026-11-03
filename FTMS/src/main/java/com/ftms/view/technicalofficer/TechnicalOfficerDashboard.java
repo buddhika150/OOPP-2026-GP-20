@@ -20,12 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-/**
- * Main Swing Dashboard for Member 3 (Technical Officer).
- * Matches the uploaded FTMS UI theme and provides navigation across
- * Dashboard, My Profile, Attendance, Attendance Summary, Medical Records,
- * Medical Approval, Notices, and Timetable.
- */
 
 
 
@@ -81,6 +75,7 @@ public class TechnicalOfficerDashboard extends JFrame {
 
     private AddAttendancePanel addAttendancePanel;
     private AttendanceSummaryPanel attendanceSummaryPanel;
+    private AddMedicalPanel addMedicalPanel;
     private MedicalApprovalPanel medicalApprovalPanel;
 
     private final Map<String, SidebarNavButton> navButtons = new LinkedHashMap<>();
@@ -97,10 +92,7 @@ public class TechnicalOfficerDashboard extends JFrame {
         navigateTo(CARD_DASHBOARD, "Technical Officer Dashboard");
     }
 
-    /**
-     * Resolves and enriches the logged-in TechnicalOfficer profile from the database
-     * (works whether LoginFrame passes a 5-arg User, full TechnicalOfficer, or SessionManager).
-     */
+
     private TechnicalOfficer resolveFullOfficerProfile(TechnicalOfficer passedOfficer) {
         TechnicalOfficer candidate = passedOfficer;
 
@@ -127,13 +119,8 @@ public class TechnicalOfficerDashboard extends JFrame {
         }
 
         // Default fallback to TO_ID = 7 (to01) if launched standalone without LoginFrame
-        TechnicalOfficer defaultProfile = profileDAO.getTechnicalOfficerProfile(7, "to01");
-        if (defaultProfile != null) {
-            return defaultProfile;
-        }
-        return new TechnicalOfficer(
-                7, "to01", "to123", "to01@gmail.com", "TECHNICAL_OFFICER",
-                "Ruwan", "Rathnayake", "0704121966", null, "ICT"
+        throw new IllegalStateException(
+                "Technical Officer login session not found. Please login again."
         );
     }
 
@@ -189,12 +176,14 @@ public class TechnicalOfficerDashboard extends JFrame {
 
         addAttendancePanel = new AddAttendancePanel();
         attendanceSummaryPanel = new AttendanceSummaryPanel();
+        addMedicalPanel = new AddMedicalPanel();
         medicalApprovalPanel = new MedicalApprovalPanel();
 
         contentCardsPanel.add(createDashboardHomePanel(), CARD_DASHBOARD);
         contentCardsPanel.add(createProfilePanel(), CARD_PROFILE);
         contentCardsPanel.add(addAttendancePanel, CARD_ATTENDANCE);
         contentCardsPanel.add(attendanceSummaryPanel, CARD_SUMMARY);
+        contentCardsPanel.add(addMedicalPanel, CARD_MEDICAL);
         contentCardsPanel.add(medicalApprovalPanel, CARD_APPROVAL);
         contentCardsPanel.add(createNoticesPanel(), CARD_NOTICES);
         contentCardsPanel.add(createTimetablePanel(), CARD_TIMETABLE);
@@ -254,9 +243,10 @@ public class TechnicalOfficerDashboard extends JFrame {
         addNavButton(topSection, CARD_PROFILE, "My Profile", "Technical Officer Profile", IconType.USERS);
         addNavButton(topSection, CARD_ATTENDANCE, "Manage Attendance", "Attendance Management", IconType.USERS);
         addNavButton(topSection, CARD_SUMMARY, "Attendance Summary", "Attendance Summary", IconType.COURSES);
+        addNavButton(topSection, CARD_MEDICAL, "Medical Records", "Medical Records Management", IconType.MEDICAL);
         addNavButton(topSection, CARD_APPROVAL,
                 "Medical Approval", "Medical Approval", IconType.APPROVAL);
-        addNavButton(topSection, CARD_NOTICES, "Manage Notices", "Faculty Notices", IconType.NOTICES);
+        addNavButton(topSection, CARD_NOTICES, " Notices", "Faculty Notices", IconType.NOTICES);
         addNavButton(topSection, CARD_TIMETABLE, "Timetable", "Department Timetable", IconType.TIMETABLE);
 
         sidebar.add(topSection, BorderLayout.NORTH);
@@ -303,6 +293,8 @@ public class TechnicalOfficerDashboard extends JFrame {
             addAttendancePanel.loadAttendanceRecords();
         } else if (CARD_SUMMARY.equals(cardKey) && attendanceSummaryPanel != null) {
             attendanceSummaryPanel.loadSummaryData();
+        } else if (CARD_MEDICAL.equals(cardKey) && addMedicalPanel != null) {
+            addMedicalPanel.loadMedicalRecords();
         } else if (CARD_APPROVAL.equals(cardKey) && medicalApprovalPanel != null) {
             medicalApprovalPanel.loadRecords();
         }
@@ -376,6 +368,13 @@ public class TechnicalOfficerDashboard extends JFrame {
                 "Attendance Summary"
         ));
 
+        cardsGrid.add(createFeatureCard(
+                "Medical Records",
+                "Add & manage student medical records",
+                IconType.MEDICAL,
+                CARD_MEDICAL,
+                "Medical Records Management"
+        ));
         cardsGrid.add(createFeatureCard(
                 "Medical Approval",
                 "Approve or reject medical requests",
@@ -1073,12 +1072,6 @@ public class TechnicalOfficerDashboard extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            TechnicalOfficer sampleOfficer = new TechnicalOfficer(
-                    7, "to01", "to123", "to01@gmail.com", "TECHNICAL_OFFICER",
-                    "Ruwan", "Rathnayake", "0704121966", null, "ICT"
-            );
-            new TechnicalOfficerDashboard(sampleOfficer).setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new com.ftms.view.LoginFrame().setVisible(true));
     }
 }
