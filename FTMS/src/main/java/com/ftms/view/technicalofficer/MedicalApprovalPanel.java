@@ -14,10 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Panel for filtering, reviewing, approving, and rejecting student medical records,
- * including opening the attached medicalimg document/image.
- */
+
 public class MedicalApprovalPanel extends JPanel {
 
     private static final Color BG_MAIN = new Color(245, 248, 251);
