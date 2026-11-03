@@ -27,6 +27,8 @@ public class StudentDashboard extends JFrame {
     private final EligibilityPanel eligibilityPanel;
     private final GradesAndGpaPanel gradesAndGpaPanel;
     private final MedicalSubmissionPanel medicalSubmissionPanel;
+    private final StudentTimetablePanel timetablePanel;
+    private final StudentNoticesPanel noticesPanel;
 
     public StudentDashboard() {
 
@@ -47,6 +49,7 @@ public class StudentDashboard extends JFrame {
 
         setTitle("FTMS - Student Dashboard");
         setSize(1200, 700);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -59,8 +62,10 @@ public class StudentDashboard extends JFrame {
         eligibilityPanel = new EligibilityPanel();
         gradesAndGpaPanel = new GradesAndGpaPanel();
 
-        // Medical submission panel
+        // Student medical records (view only)
         medicalSubmissionPanel = new MedicalSubmissionPanel();
+        timetablePanel = new StudentTimetablePanel(currentStudent.getDepartment());
+        noticesPanel = new StudentNoticesPanel();
 
         // CardLayout
         CardLayout layout = new CardLayout();
@@ -73,8 +78,10 @@ public class StudentDashboard extends JFrame {
         content.add(eligibilityPanel, "Eligibility");
         content.add(gradesAndGpaPanel, "Grades");
 
-        // New Medical page
+        // Student medical records page
         content.add(medicalSubmissionPanel, "Medical");
+        content.add(timetablePanel, "Timetable");
+        content.add(noticesPanel, "Notices");
 
         // Sidebar
         add(
@@ -219,6 +226,7 @@ public class StudentDashboard extends JFrame {
         );
 
         profilePanel.updateProfileData();
+        medicalSubmissionPanel.refreshRecords();
     }
 
     public static void main(String[] args) {

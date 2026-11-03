@@ -54,7 +54,9 @@ public class SidebarPanel extends JPanel {
         addNav("My Attendance", "Attendance", cardLayout, mainContentPanel, refreshDataCallback);
         addNav("My Eligibility", "Eligibility", cardLayout, mainContentPanel, refreshDataCallback);
         addNav("My Grades & GPA", "Grades", cardLayout, mainContentPanel, refreshDataCallback);
-        addNav("Submit Medical", "Medical", cardLayout, mainContentPanel, null);
+        addNav("View Medical", "Medical", cardLayout, mainContentPanel, refreshDataCallback);
+        addNav("My Timetable", "Timetable", cardLayout, mainContentPanel, null);
+        addNav("Notices", "Notices", cardLayout, mainContentPanel, null);
 
         setSelected(dashboard);
         add(Box.createVerticalGlue());
