@@ -334,6 +334,7 @@ public class MyCourses extends JFrame{
 
         eligibility_button.addActionListener(e -> {
 
+            new LecturerStudentEligibility(lectureId);
             this.setVisible(false);
 
 
@@ -349,7 +350,7 @@ public class MyCourses extends JFrame{
         profile_button.setBackground(sidebar_button_color);
         profile_button.setForeground(Color.WHITE);
 
-        URL profile_image_path = getClass().getResource("/images/student_eligibility.png");
+        URL profile_image_path = getClass().getResource("/images/profile.png");
         ImageIcon profile_icon = new ImageIcon(profile_image_path);
         profile_button.setIcon(profile_icon);
 
@@ -363,6 +364,108 @@ public class MyCourses extends JFrame{
 
 
         });
+
+
+        //Student gpa button
+
+        JButton  student_gpa_button= new JButton("Student Marks and GPA");
+        sidebar.add(student_gpa_button);
+
+        student_gpa_button.setPreferredSize(sidebar_button_size);
+        student_gpa_button.setBackground(sidebar_button_color);
+        student_gpa_button.setForeground(Color.WHITE);
+
+        URL student_gpa_path = getClass().getResource("/images/gpa.png");
+        ImageIcon student_gpa_icon = new ImageIcon(student_gpa_path);
+        student_gpa_button.setIcon(student_gpa_icon);
+
+        student_gpa_button.setHorizontalAlignment(SwingConstants.LEFT);
+        student_gpa_button.setIconTextGap(15);
+
+        student_gpa_button.addActionListener(e -> {
+
+            new Lecturer_Student_Marks_GPA(lectureId);
+            this.setVisible(false);
+
+
+        });
+
+
+        //student medicle button
+
+        JButton  student_medicle_button= new JButton("Student Medicle");
+        sidebar.add(student_medicle_button);
+
+        student_medicle_button.setPreferredSize(sidebar_button_size);
+        student_medicle_button.setBackground(sidebar_button_color);
+        student_medicle_button.setForeground(Color.WHITE);
+
+        URL student_madicle_path = getClass().getResource("/images/medicle.png");
+        ImageIcon student_medicle_icon = new ImageIcon(student_madicle_path);
+        student_medicle_button.setIcon(student_medicle_icon);
+
+        student_medicle_button.setHorizontalAlignment(SwingConstants.LEFT);
+        student_medicle_button.setIconTextGap(15);
+
+        student_medicle_button.addActionListener(e -> {
+
+            new Lecturer_student_medicle(lectureId);
+            this.setVisible(false);
+
+
+        });
+
+
+        //student ditais button
+
+        JButton  student_ditails_button= new JButton("Student Details");
+        sidebar.add(student_ditails_button);
+
+        student_ditails_button.setPreferredSize(sidebar_button_size);
+        student_ditails_button.setBackground(sidebar_button_color);
+        student_ditails_button.setForeground(Color.WHITE);
+
+        URL student_ditails_path = getClass().getResource("/images/ditals.png");
+        ImageIcon student_ditails_icon = new ImageIcon(student_ditails_path);
+        student_ditails_button.setIcon(student_ditails_icon);
+
+        student_ditails_button.setHorizontalAlignment(SwingConstants.LEFT);
+        student_ditails_button.setIconTextGap(15);
+
+        student_ditails_button.addActionListener(e -> {
+
+            new Lecturer_Student_Details(lectureId);
+            this.setVisible(false);
+
+
+        });
+
+
+        //student notice button
+
+        JButton notice_button= new JButton("Notice");
+        sidebar.add(notice_button);
+
+        notice_button.setPreferredSize(sidebar_button_size);
+        notice_button.setBackground(sidebar_button_color);
+        notice_button.setForeground(Color.WHITE);
+
+        URL notice_path = getClass().getResource("/images/notice.png");
+        ImageIcon notice_icon = new ImageIcon(notice_path);
+        notice_button.setIcon(notice_icon);
+
+        notice_button.setHorizontalAlignment(SwingConstants.LEFT);
+        notice_button.setIconTextGap(15);
+
+        notice_button.addActionListener(e -> {
+
+            new Lecturer_Notice_View(lectureId);
+            this.setVisible(false);
+
+
+        });
+
+
 
         //log out
 
@@ -396,6 +499,7 @@ public class MyCourses extends JFrame{
 
 
     }
+
 
 
 
