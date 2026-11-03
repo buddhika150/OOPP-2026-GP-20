@@ -3,7 +3,9 @@ package com.ftms.dao;
 
 import com.ftms.database.DatabaseConnection;
 import com.ftms.model.Attendance;
+import com.ftms.model.TechnicalOfficer;
 import com.ftms.model.AttendanceRecord;
+
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -220,6 +222,72 @@ public class AttendanceDAO {
         return 0.0;
     }
 
+
+    // 9. Load Technical Officer full profile from user + technical_officer tables
+    public TechnicalOfficer getTechnicalOfficerProfile(int userId, String username) {
+        String sql = "SELECT u.User_ID, u.Username, u.Password, u.Email, u.Role, u.Fname, u.Lname, u.Phone, u.Profile_pic, t.Department " +
+                "FROM user u LEFT JOIN technical_officer t ON u.User_ID = t.TO_ID " +
+                "WHERE (u.User_ID = ? OR u.Username = ?) AND u.Role = 'TECHNICAL_OFFICER' LIMIT 1";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setString(2, username != null ? username : "");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new TechnicalOfficer(
+                            rs.getInt("User_ID"),
+                            rs.getString("Username"),
+                            rs.getString("Password"),
+                            rs.getString("Email"),
+                            rs.getString("Role"),
+                            rs.getString("Fname"),
+                            rs.getString("Lname"),
+                            rs.getString("Phone"),
+                            rs.getString("Profile_pic"),
+                            rs.getString("Department")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // 10. Update Technical Officer profile details in user + technical_officer tables
+    public boolean updateTechnicalOfficerProfile(TechnicalOfficer to) {
+        String updateUserSql = "UPDATE user SET Email = ?, Fname = ?, Lname = ?, Phone = ?, Profile_pic = ? WHERE User_ID = ?";
+        String updateToSql = "UPDATE technical_officer SET Department = ? WHERE TO_ID = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            try (PreparedStatement psUser = conn.prepareStatement(updateUserSql)) {
+                psUser.setString(1, to.getEmail());
+                psUser.setString(2, to.getFname());
+                psUser.setString(3, to.getLname());
+                psUser.setString(4, to.getPhone());
+                psUser.setString(5, to.getProfilePic());
+                psUser.setInt(6, to.getToId());
+                psUser.executeUpdate();
+            }
+
+            if (to.getDepartment() != null) {
+                try (PreparedStatement psTo = conn.prepareStatement(updateToSql)) {
+                    psTo.setString(1, to.getDepartment());
+                    psTo.setInt(2, to.getToId());
+                    psTo.executeUpdate();
+                }
+            }
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Helper method to convert ResultSet row to Attendance object
+
     // Student dashboard attendance summary
     public List<AttendanceRecord> getAttendanceRecordsForStudent(int studentId) {
 
@@ -313,6 +381,7 @@ public class AttendanceDAO {
     }
 
     // Convert database row to Attendance object
+
     private Attendance mapRow(ResultSet rs) throws SQLException {
         Date sqlDate = rs.getDate("Session_date");
 
