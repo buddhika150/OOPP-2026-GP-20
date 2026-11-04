@@ -5,13 +5,12 @@ import java.awt.*;
 import java.net.URL;
 
 import com.ftms.view.LoginFrame;
-
-
+import com.ftms.view.student.StudentNoticesPanel;
 
 
 public class LecturerDashboard extends JFrame{
 
-       JPanel main_panel = new JPanel(new BorderLayout());    //slide bar and dear balence main panel
+       JPanel main_panel = new JPanel(new BorderLayout());    //slide bar and hedar balence main panel
 
         private int lectureId;
 
@@ -36,8 +35,7 @@ public class LecturerDashboard extends JFrame{
 private void setupWindow(){
 
         setTitle("Lecturer Dashboard");
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setLocationRelativeTo(null);            //open windo dispay center
+        setExtendedState(JFrame.MAXIMIZED_BOTH);    //open full sized fream
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Color bgcolor = new Color(245, 249, 252);
@@ -90,7 +88,7 @@ private void setupWindow(){
         Color button_text_color = new Color(16, 45, 79);
         Dimension button_size = new Dimension(300,180);
 
-        //utton_panel.setLayout(new FlowLayout(FlowLayout.CENTER,20,20));
+
         button_panel.setLayout(new GridLayout(3, 2, 20, 20));
 
         //my courses botton
@@ -576,7 +574,7 @@ private  void CreaterSidebar(){
 
     notice_button.addActionListener(e -> {
 
-        new Lecturer_Notice_View(lectureId);
+        new StudentNoticesPanel();
         this.setVisible(false);
 
 

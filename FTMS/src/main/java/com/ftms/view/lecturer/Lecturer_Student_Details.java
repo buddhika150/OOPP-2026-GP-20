@@ -29,7 +29,7 @@ public class Lecturer_Student_Details extends JFrame {
     private void setupWindow() {
         setTitle("Student Details");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
         getContentPane().setBackground(Color.WHITE);
     }
@@ -66,32 +66,40 @@ public class Lecturer_Student_Details extends JFrame {
     }
 
     private void createTable() {
+
         String[] columns = {
-                "Student ID", "TG Number", "Full Name", "Email", "Phone",
-                "Batch", "Department", "Year", "Semester", "Status"
+                "Student ID", "TG Number", "Full Name",
+                "Email", "Phone", "Batch", "Department",
+                "Year", "Semester", "Status"
         };
 
-        model = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int col) {
-                return false;
-            }
-        };
+        model = new DefaultTableModel(columns, 0);
 
-        JTable table = new JTable(model);
-        table.setRowHeight(35);
-        table.setFont(new Font("Arial", Font.PLAIN, 14));
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        JTable student_table = new JTable(model);
 
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setPreferredWidth(140);
+        student_table.setRowHeight(35);
+        student_table.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        student_table.getTableHeader().setFont(
+                new Font("Arial", Font.BOLD, 14)
+        );
+
+        student_table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        for (int i = 0; i < student_table.getColumnCount(); i++) {
+            student_table.getColumnModel().getColumn(i).setPreferredWidth(140);   // culum size same add same size
         }
-        table.getColumnModel().getColumn(2).setPreferredWidth(200);
-        table.getColumnModel().getColumn(3).setPreferredWidth(220);
 
-        center_panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        student_table.getColumnModel().getColumn(2).setPreferredWidth(200);
+        student_table.getColumnModel().getColumn(3).setPreferredWidth(220);
+
+        center_panel.add(
+                new JScrollPane(student_table),
+                BorderLayout.CENTER
+        );
     }
+
+
 
     private void loadCourses() {
         String sql = "SELECT DISTINCT Course_code FROM lecturer_course "

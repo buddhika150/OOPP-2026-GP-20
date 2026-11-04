@@ -41,7 +41,7 @@ public class UploadMarks extends JFrame {
         setTitle("Upload Marks");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
         getContentPane().setBackground(Color.WHITE);

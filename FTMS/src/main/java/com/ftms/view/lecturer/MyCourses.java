@@ -42,7 +42,7 @@ public class MyCourses extends JFrame{
 
         setTitle("My courses");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10 , 10));
         getContentPane().setBackground(new Color(245, 249, 252));
 
@@ -83,11 +83,11 @@ public class MyCourses extends JFrame{
                 "Acadamic Year"
         };
 
-        DefaultTableModel database_data_gate_model = new DefaultTableModel(colums,0);
+        DefaultTableModel database_data_gate_model = new DefaultTableModel(colums,0); //use table data manage
 
         JTable course_tabel = new JTable(database_data_gate_model);
 
-        course_tabel.setRowHeight(30);  //one raw hight
+        course_tabel.setRowHeight(30);  // raw hight
         JScrollPane can_scroll = new JScrollPane(course_tabel);
 
         main_panel.add(can_scroll,BorderLayout.CENTER);
@@ -115,7 +115,7 @@ public class MyCourses extends JFrame{
         try {
 
             Connection con = DatabaseConnection.getConnection();
-            PreparedStatement pst = con.prepareStatement(sql);
+            PreparedStatement pst = con.prepareStatement(sql);  //use SQL query execute
 
             pst.setInt(1, lectureId);
 

@@ -2,6 +2,7 @@ package com.ftms.view.lecturer;
 
 import com.ftms.database.DatabaseConnection;
 import com.ftms.view.LoginFrame;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -9,77 +10,137 @@ import java.net.URL;
 import java.sql.*;
 
 public class Lecturer_student_medicle extends JFrame {
-    private final int lecturerId;
+
+    private int lecturerId;
+
     private JComboBox<String> course_box;
+    private JTable medical_table;
     private DefaultTableModel model;
-    private final JPanel center_panel = new JPanel(new BorderLayout(10, 10));
+
+    JPanel main_panel = new JPanel(new BorderLayout(10, 10));
+    JPanel center_panel = new JPanel(new BorderLayout(10, 10));
 
     public Lecturer_student_medicle(int lecturerId) {
+
         this.lecturerId = lecturerId;
+
         setupWindow();
         CreateHeading();
         CreaterSidebar();
         createCourseSelect();
         createTable();
         loadCourses();
+
+        this.add(main_panel, BorderLayout.CENTER);
+
         setVisible(true);
     }
 
     private void setupWindow() {
+
         setTitle("Student Medical Records");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
-        getContentPane().setBackground(Color.WHITE);
+
+        getContentPane().setBackground(new Color(245, 249, 252));
     }
 
     private void CreateHeading() {
-        JLabel heading = new JLabel("Student Medical Records");
-        heading.setFont(new Font("Arial", Font.BOLD, 30));
-        heading.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
-        add(heading, BorderLayout.NORTH);
+
+        JPanel heading_panel = new JPanel(new BorderLayout());
+
+        heading_panel.setPreferredSize(new Dimension(500, 150));
+        heading_panel.setBackground(Color.WHITE);
+
+        JLabel heading = new JLabel(" Student Medical Records");
+        heading.setFont(new Font("Arial", Font.BOLD, 45));
+        heading.setForeground(new Color(16, 45, 79));
+
+        heading_panel.add(heading, BorderLayout.WEST);
+
+        main_panel.add(heading_panel, BorderLayout.NORTH);
     }
 
     private void createCourseSelect() {
-        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 15));
-        top.setBackground(Color.WHITE);
-        JLabel label = new JLabel("Select Course:");
-        label.setFont(new Font("Arial", Font.BOLD, 17));
+
+        JPanel course_panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 25));
+        course_panel.setBackground(Color.WHITE);
+
+        JLabel course_label = new JLabel("Select Course:");
+        course_label.setFont(new Font("Arial", Font.BOLD, 20));
+
         course_box = new JComboBox<>();
-        course_box.setPreferredSize(new Dimension(250, 35));
-        top.add(label);
-        top.add(course_box);
+        course_box.setPreferredSize(new Dimension(250, 40));
+
+        course_panel.add(course_label);
+        course_panel.add(course_box);
+
         center_panel.setBackground(Color.WHITE);
-        center_panel.add(top, BorderLayout.NORTH);
-        add(center_panel, BorderLayout.CENTER);
+        center_panel.add(course_panel, BorderLayout.NORTH);
+
+        main_panel.add(center_panel, BorderLayout.CENTER);
+
         course_box.addActionListener(e -> {
-            String course = (String) course_box.getSelectedItem();
-            if (course != null && model != null) loadMedicalRecords(course);
+
+            String courseCode = (String) course_box.getSelectedItem();
+
+            if (courseCode != null) {
+                loadMedicalRecords(courseCode);
+            }
         });
     }
 
     private void createTable() {
-        String[] columns = {"Student ID", "Medical Date", "Status"};
-        model = new DefaultTableModel(columns, 0) {
-            @Override public boolean isCellEditable(int row, int col) { return false; }
+
+        String[] columns = {
+                "Student ID",
+                "Medical Date",
+                "Approval Status",
+                "Status"
         };
-        JTable table = new JTable(model);
-        table.setRowHeight(35);
-        table.setFont(new Font("Arial", Font.PLAIN, 15));
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
-        center_panel.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        model = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        medical_table = new JTable(model);
+
+        medical_table.setRowHeight(40);
+        medical_table.setFont(new Font("Arial", Font.PLAIN, 17));
+        medical_table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 18));
+
+        center_panel.add(new JScrollPane(medical_table), BorderLayout.CENTER);
     }
 
     private void loadCourses() {
-        String sql = "SELECT DISTINCT Course_code FROM lecturer_course WHERE Lecturer_ID=? ORDER BY Course_code";
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+
+        try {
+
+            Connection con = DatabaseConnection.getConnection();
+
+            String sql = "SELECT DISTINCT Course_code FROM lecturer_course " +
+                    "WHERE Lecturer_ID = ? ORDER BY Course_code";
+
+            PreparedStatement pst = con.prepareStatement(sql);
+
             pst.setInt(1, lecturerId);
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) course_box.addItem(rs.getString("Course_code"));
+
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                course_box.addItem(rs.getString("Course_code"));
             }
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage());
+
+            rs.close();
+            pst.close();
+            con.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
@@ -87,15 +148,17 @@ public class Lecturer_student_medicle extends JFrame {
 
         model.setRowCount(0);
 
-        String sql = "SELECT m.Student_ID, m.Submission_date, "
-                + "m.Approval_status, m.Status "
-                + "FROM medical m "
-                + "JOIN attendance a ON m.Attendance_ID = a.Attendance_ID "
-                + "JOIN lecturer_course lc ON a.Course_code = lc.Course_code "
-                + "WHERE lc.Lecturer_ID = ? AND a.Course_code = ?";
+        String sql = "SELECT m.Student_ID, m.Submission_date, " +
+                "m.Approval_status, m.Status " +
+                "FROM medical m " +
+                "JOIN attendance a ON m.Attendance_ID = a.Attendance_ID " +
+                "JOIN lecturer_course lc ON a.Course_code = lc.Course_code " +
+                "WHERE lc.Lecturer_ID = ? AND a.Course_code = ?";
 
         try {
+
             Connection con = DatabaseConnection.getConnection();
+
             PreparedStatement pst = con.prepareStatement(sql);
 
             pst.setInt(1, lecturerId);
@@ -104,6 +167,7 @@ public class Lecturer_student_medicle extends JFrame {
             ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
+
                 model.addRow(new Object[]{
                         rs.getInt("Student_ID"),
                         rs.getString("Submission_date"),
@@ -120,7 +184,6 @@ public class Lecturer_student_medicle extends JFrame {
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //sidebar

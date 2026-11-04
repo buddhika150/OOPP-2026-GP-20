@@ -41,7 +41,7 @@ public class LecturerStudentEligibility extends JFrame {
 
         setTitle("Student Eligibility");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
         getContentPane().setBackground(new Color(245, 249, 252));
@@ -102,6 +102,7 @@ public class LecturerStudentEligibility extends JFrame {
                 "Student ID",
                 "Course Code",
                 "CA Marks /40",
+                "Attendance %",
                 "Eligibility"
         };
 
@@ -110,9 +111,7 @@ public class LecturerStudentEligibility extends JFrame {
         eligibility_table = new JTable(model);
 
         eligibility_table.setRowHeight(40);
-        eligibility_table.setFont(
-                new Font("Arial", Font.PLAIN, 17)
-        );
+        eligibility_table.setFont(new Font("Arial", Font.PLAIN, 17));
 
         eligibility_table.getTableHeader().setFont(
                 new Font("Arial", Font.BOLD, 18)
@@ -123,6 +122,7 @@ public class LecturerStudentEligibility extends JFrame {
                 BorderLayout.CENTER
         );
     }
+
 
     private void loadCourses() {
 
@@ -157,39 +157,48 @@ public class LecturerStudentEligibility extends JFrame {
 
         model.setRowCount(0);
 
+        String sql = "SELECT e.Student_ID, e.Course_code, m.CA_marks, " +
+                "COUNT(a.Attendance_ID) AS Total, " +
+                "COALESCE(SUM(CASE WHEN a.Is_Present = 1 THEN 1 ELSE 0 END), 0) AS Present " +
+                "FROM enrollment e " +
+                "LEFT JOIN marks m ON e.Student_ID = m.Student_ID " +
+                "AND e.Course_code = m.Course_code " +
+                "LEFT JOIN attendance a ON e.Student_ID = a.Student_ID " +
+                "AND e.Course_code = a.Course_code " +
+                "WHERE e.Course_code = ? " +
+                "GROUP BY e.Student_ID, e.Course_code, m.CA_marks";
+
         try {
 
             Connection con = DatabaseConnection.getConnection();
 
-            String sql =
-                    "SELECT e.Student_ID, e.Course_code, m.CA_marks " +
-                            "FROM enrollment e " +
-                            "LEFT JOIN marks m " +
-                            "ON e.Student_ID = m.Student_ID " +
-                            "AND e.Course_code = m.Course_code " +
-                            "WHERE e.Course_code = ? " +
-                            "AND EXISTS (SELECT 1 FROM lecturer_course lc " +
-                            "WHERE lc.Course_code = e.Course_code " +
-                            "AND lc.Lecturer_ID = ?)";
-
             PreparedStatement pst = con.prepareStatement(sql);
-
             pst.setString(1, courseCode);
-            pst.setInt(2, lecturerId);
 
             ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
 
+                int student_id = rs.getInt("Student_ID");
+
                 Object marks = rs.getObject("CA_marks");
+
+                int total = rs.getInt("Total");
+                int present = rs.getInt("Present");
+
+                double percentage = 0;
+
+                if (total > 0) {
+                    percentage = (present * 100.0) / total;
+                }
 
                 String status = "Pending";
 
-                if (marks != null) {
+                if (marks != null && total > 0) {
 
                     double ca = rs.getDouble("CA_marks");
 
-                    if (ca >= 20) {
+                    if (ca >= 16 && percentage >= 80) {
                         status = "Eligible";
                     } else {
                         status = "Not Eligible";
@@ -197,9 +206,10 @@ public class LecturerStudentEligibility extends JFrame {
                 }
 
                 model.addRow(new Object[]{
-                        rs.getInt("Student_ID"),
+                        student_id,
                         rs.getString("Course_code"),
                         marks == null ? "" : marks,
+                        total == 0 ? "N/A" : String.format("%.2f%%", percentage),
                         status
                 });
             }
@@ -208,12 +218,10 @@ public class LecturerStudentEligibility extends JFrame {
             pst.close();
             con.close();
 
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
         }
     }
-
-
 
 
 

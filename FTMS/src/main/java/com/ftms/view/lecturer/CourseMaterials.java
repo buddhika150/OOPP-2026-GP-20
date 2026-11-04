@@ -34,7 +34,6 @@ public class CourseMaterials extends JFrame {
       setupwindow();
       create_heading();
       CreaterSidebar();
-      //create_material_upload();
       create_upload_button();
      material_tabel();
 
@@ -50,7 +49,7 @@ public class CourseMaterials extends JFrame {
 
         setTitle("courses Materials");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10 , 10));
         getContentPane().setBackground(new Color(245, 249, 252));
 
@@ -114,39 +113,6 @@ public class CourseMaterials extends JFrame {
 
 
 
-
-
-
-
-//delet option
-
-    class DeleteButton extends JButton
-            implements javax.swing.table.TableCellRenderer {
-
-        public DeleteButton() {
-            setText("Delete");
-            setBackground(Color.RED);
-            setForeground(Color.WHITE);
-            setOpaque(true);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(
-                JTable table,
-                Object value,
-                boolean isSelected,
-                boolean hasFocus,
-                int row,
-                int column) {
-
-            return this;
-
-
-        }
-    }
-
-
-
 private  void material_tabel(){
 
         String[] colums = {
@@ -165,7 +131,6 @@ private  void material_tabel(){
 
         JTable material_tabel = new JTable(model);
 
-    material_tabel.getColumnModel().getColumn(6).setCellRenderer(new DeleteButton());
 
     material_tabel.addMouseListener(new java.awt.event.MouseAdapter() {
 
@@ -288,156 +253,7 @@ private  void material_tabel(){
     }
 
 
-/*
-    private void create_material_upload(){
 
-      JPanel material_upload_panel = new JPanel(new GridLayout(0,2,15,15));
-      material_upload_panel.setPreferredSize(new Dimension(650,200));
-
-      main_panel.add(material_upload_panel,BorderLayout.CENTER);
-
-
-
-        //cours_coad  add
-
-      JLabel course_coad_label = new JLabel("Course Code:");
-      JTextField course_coad_Field  = new JTextField(15);
-
-      material_upload_panel.add(course_coad_label);
-      material_upload_panel.add(course_coad_Field);
-
-      //Lecture id
-
-      JLabel lecturer_id_label = new JLabel("Lecturer ID:");
-        JTextField lecturer_id_field = new JTextField(10);
-
-        material_upload_panel.add(lecturer_id_label);
-        material_upload_panel.add(lecturer_id_field);
-
-      //material title add
-
-        JLabel material_title_label = new JLabel("Material Title");
-        JTextField material_title_filed = new JTextField(15);
-        material_upload_panel.add(material_title_label);
-        material_upload_panel.add(material_title_filed);
-
-
-        //material type
-
-        JLabel material_type_label = new JLabel("Material Type");
-        String[] material_type =  {"PDF", "PPT", "DOCX", "Video", "Other"};
-        JComboBox<String> type_of_materil_dropdown = new JComboBox<>(material_type);
-
-        material_upload_panel.add(material_type_label);
-        material_upload_panel.add(type_of_materil_dropdown);
-
-        //choose file
-
-        JTextField file_path_field = new  JTextField(20);
-        file_path_field.setEditable(false);
-        material_upload_panel.add(file_path_field);
-
-        JButton choose_file_button = new JButton("Choose File");
-        material_upload_panel.add(choose_file_button);
-
-        choose_file_button.addActionListener(e -> {
-
-            JFileChooser choose_file = new JFileChooser();
-             int result = choose_file.showOpenDialog(this);
-
-             if(result == JFileChooser.APPROVE_OPTION){
-
-                 String filepath =  choose_file.getSelectedFile().getAbsolutePath();
-
-
-                 file_path_field.setText(filepath);
-
-             }
-
-        });
-
-      JButton upload_button = new JButton("Upload Material");
-      material_upload_panel.add(upload_button);
-
-      upload_button.addActionListener(e -> {
-
-
-          int lecturer_id;
-
-          try {
-              lecturer_id = Integer.parseInt(lecturer_id_field.getText().trim());
-          } catch (NumberFormatException ex) {
-              JOptionPane.showMessageDialog(this, "Enter a valid Lecturer ID");
-              return;
-          }
-
-          String course_coad = course_coad_Field.getText();
-
-          String title = material_title_filed.getText();
-
-          String materialtype = type_of_materil_dropdown.getSelectedItem().toString();
-
-           String file_path = file_path_field.getText();
-
-
-          if (course_coad.trim().isEmpty() ||
-                  title.trim().isEmpty() ||                     //all box fill and space remove
-                  file_path.trim().isEmpty()) {
-
-              JOptionPane.showMessageDialog(this, "Please fill all fields");
-
-              return;
-          }
-
-          JOptionPane.showMessageDialog(this,
-                  "Course Code: " + course_coad +
-                          "\nTitle: " + title +
-                          "\nMaterial Type: " + materialtype +
-                          "\nFile Path: " + file_path);
-
-
-          try{
-
-              Connection con = DatabaseConnection.getConnection();
-              JOptionPane.showMessageDialog(this,"Database Connected");
-
-              String sql = "INSERT INTO course_material " + "(Course_code, Lecturer_ID, Title, Material_type, File_path, Uploaded_date) " + "VALUES (?, ?, ?, ?, ?, ?)";
-
-              PreparedStatement pst = con.prepareStatement(sql);
-
-              pst.setString(1,course_coad);
-              pst.setInt(2,lecturer_id);
-              pst.setString(3,title);
-              pst.setString(4,materialtype);
-              pst.setString(5,file_path);
-              pst.setDate(6,new java.sql.Date(System.currentTimeMillis()));
-
-
-              int rows = pst.executeUpdate();
-
-              if (rows > 0) {
-                  JOptionPane.showMessageDialog(this, "Material Saved Successfully!");
-              }
-
-
-          }
-          catch (Exception ex){
-              JOptionPane.showMessageDialog(this, ex.getMessage());
-          }
-
-
-
-
-      });
-
-
-
-
-
-    }
-
-
-*/
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

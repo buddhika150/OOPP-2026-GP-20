@@ -10,101 +10,124 @@ import java.sql.*;
 
 public class Lecturer_Notice_View extends JFrame {
 
-    private final int lecturerId;
+    private int lecturerId;
     private DefaultTableModel model;
     private JTable notice_table;
     private JTextArea content_area;
-    private final JPanel center_panel = new JPanel(new BorderLayout(10, 10));
+
+    JPanel main_panel = new JPanel(new BorderLayout(10, 10));
+    JPanel center_panel = new JPanel(new BorderLayout(10, 10));
 
     public Lecturer_Notice_View(int lecturerId) {
+
         this.lecturerId = lecturerId;
+
         setupWindow();
         CreateHeading();
         CreaterSidebar();
         createTable();
         loadNotices();
+
+        this.add(main_panel, BorderLayout.CENTER);
         setVisible(true);
     }
 
     private void setupWindow() {
+
         setTitle("Notice View");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
-        getContentPane().setBackground(Color.WHITE);
+        getContentPane().setBackground(new Color(245, 249, 252));
     }
 
     private void CreateHeading() {
-        JLabel heading = new JLabel("Notices");
-        heading.setFont(new Font("Arial", Font.BOLD, 30));
-        heading.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
-        add(heading, BorderLayout.NORTH);
+
+        JPanel heading_panel = new JPanel(new BorderLayout());
+        heading_panel.setPreferredSize(new Dimension(500, 150));
+        heading_panel.setBackground(Color.WHITE);
+
+        JLabel heading = new JLabel(" Notices");
+        heading.setFont(new Font("Arial", Font.BOLD, 45));
+        heading.setForeground(new Color(16, 45, 79));
+
+        heading_panel.add(heading, BorderLayout.WEST);
+        main_panel.add(heading_panel, BorderLayout.NORTH);
     }
 
     private void createTable() {
-        center_panel.setBackground(Color.WHITE);
-        center_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 15, 15));
 
-        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        top.setBackground(Color.WHITE);
+        center_panel.setBackground(Color.WHITE);
+
+        JPanel button_panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 25));
+        button_panel.setBackground(Color.WHITE);
+
         JButton refresh_button = new JButton("Refresh Notices");
         refresh_button.setBackground(new Color(0, 143, 156));
         refresh_button.setForeground(Color.WHITE);
-        top.add(refresh_button);
-        center_panel.add(top, BorderLayout.NORTH);
-        refresh_button.addActionListener(e -> loadNotices());
+        button_panel.add(refresh_button);
+
+        center_panel.add(button_panel, BorderLayout.NORTH);
+        refresh_button.addActionListener(e -> {
+            loadNotices();
+        });
 
         String[] columns = {"Notice ID", "Title", "Published Date"};
+
         model = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int col) {
-                return false;
-            }
+
         };
 
         notice_table = new JTable(model);
-        notice_table.setRowHeight(35);
-        notice_table.setFont(new Font("Arial", Font.PLAIN, 15));
-        notice_table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 15));
+        notice_table.setRowHeight(40);
+        notice_table.setFont(new Font("Arial", Font.PLAIN, 17));
+        notice_table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 18));
         notice_table.getColumnModel().getColumn(1).setPreferredWidth(350);
+
         JScrollPane table_scroll = new JScrollPane(notice_table);
 
-        JPanel details_panel = new JPanel(new BorderLayout(5, 5));
+        JPanel details_panel = new JPanel(new BorderLayout(10, 10));
         details_panel.setBackground(Color.WHITE);
+
         JLabel details_label = new JLabel("Notice Content:");
-        details_label.setFont(new Font("Arial", Font.BOLD, 17));
+        details_label.setFont(new Font("Arial", Font.BOLD, 20));
+
         content_area = new JTextArea();
         content_area.setEditable(false);
         content_area.setLineWrap(true);
         content_area.setWrapStyleWord(true);
-        content_area.setFont(new Font("Arial", Font.PLAIN, 15));
+        content_area.setFont(new Font("Arial", Font.PLAIN, 17));
         content_area.setMargin(new Insets(10, 10, 10, 10));
+
         details_panel.add(details_label, BorderLayout.NORTH);
         details_panel.add(new JScrollPane(content_area), BorderLayout.CENTER);
 
-        JSplitPane split_pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                table_scroll, details_panel);
+        JSplitPane split_pane = new JSplitPane(
+                JSplitPane.VERTICAL_SPLIT, table_scroll, details_panel
+        );
         split_pane.setResizeWeight(0.6);
+
         center_panel.add(split_pane, BorderLayout.CENTER);
-        add(center_panel, BorderLayout.CENTER);
+        main_panel.add(center_panel, BorderLayout.CENTER);
 
         notice_table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = notice_table.getSelectedRow();
                 if (row >= 0) {
-                    int noticeId = Integer.parseInt(model.getValueAt(row, 0).toString());
-                    showNotice(noticeId);
+                    int notice_id = Integer.parseInt(model.getValueAt(row, 0).toString());
+                    showNotice(notice_id);
                 }
             }
         });
     }
 
     private void loadNotices() {
+
         model.setRowCount(0);
         content_area.setText("");
 
-        String sql = "SELECT Notice_ID, Title, Published_date "
-                + "FROM notice ORDER BY Published_date DESC, Notice_ID DESC";
+        String sql = "SELECT Notice_ID, Title, Published_date " +
+                "FROM notice ORDER BY Published_date DESC, Notice_ID DESC";
 
         try {
             Connection con = DatabaseConnection.getConnection();
@@ -122,18 +145,20 @@ public class Lecturer_Notice_View extends JFrame {
             rs.close();
             pst.close();
             con.close();
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
-    private void showNotice(int noticeId) {
+    private void showNotice(int notice_id) {
+
         String sql = "SELECT Content FROM notice WHERE Notice_ID = ?";
 
         try {
             Connection con = DatabaseConnection.getConnection();
             PreparedStatement pst = con.prepareStatement(sql);
-            pst.setInt(1, noticeId);
+            pst.setInt(1, notice_id);
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
@@ -144,6 +169,7 @@ public class Lecturer_Notice_View extends JFrame {
             rs.close();
             pst.close();
             con.close();
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
@@ -151,7 +177,7 @@ public class Lecturer_Notice_View extends JFrame {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //sidebar
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     private  void CreaterSidebar(){
@@ -505,3 +531,4 @@ public class Lecturer_Notice_View extends JFrame {
 
 
 }
+

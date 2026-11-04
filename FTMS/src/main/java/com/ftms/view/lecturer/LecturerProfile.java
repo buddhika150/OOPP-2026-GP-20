@@ -50,7 +50,6 @@ public class LecturerProfile extends JFrame {
 
         setTitle("Lecturer Profile");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setLocationRelativeTo(null);            //open windo dispay center
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Color bgcolor = new Color(245, 249, 252);
@@ -98,8 +97,7 @@ private void CreateHeading(){
         JPanel profile_panel = new JPanel(new BorderLayout(35, 20));
         profile_panel.setBackground(Color.WHITE);
         profile_panel.setPreferredSize(new Dimension(1100, 480));
-        profile_panel.setBorder(
-                BorderFactory.createEmptyBorder(40, 45, 40, 45)
+        profile_panel.setBorder(BorderFactory.createEmptyBorder(40, 45, 40, 45)
         );
 
 

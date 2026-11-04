@@ -56,7 +56,7 @@ public class LecturerAttendanceSummary extends JFrame {
 
         setTitle("LecturerAttendanceSummary");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
         getContentPane().setBackground(new Color(245, 249, 252));
 
@@ -182,7 +182,6 @@ public class LecturerAttendanceSummary extends JFrame {
 
     private void loadAttendance(String course_code) {
 
-        System.out.println("Selected Course: " + course_code);
 
         model.setRowCount(0);
 

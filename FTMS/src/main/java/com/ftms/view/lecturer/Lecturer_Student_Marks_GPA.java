@@ -40,7 +40,7 @@ public class Lecturer_Student_Marks_GPA extends JFrame {
 
         setTitle("Student Marks, Grades & GPA");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
         getContentPane().setBackground(new Color(245, 249, 252));
@@ -103,6 +103,7 @@ public class Lecturer_Student_Marks_GPA extends JFrame {
         };
 
         model = new DefaultTableModel(columns, 0) {
+
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
