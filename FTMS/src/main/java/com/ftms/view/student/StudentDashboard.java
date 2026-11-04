@@ -1,4 +1,3 @@
-
 package com.ftms.view.student;
 
 import com.ftms.dao.MarksDAO;
@@ -18,7 +17,6 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class StudentDashboard extends JFrame {
-
     private final Undergraduate currentStudent;
     private final DashboardHomePanel homePanel;
     private final ProfilePanel profilePanel;
@@ -31,20 +29,13 @@ public class StudentDashboard extends JFrame {
     private final StudentNoticesPanel noticesPanel;
 
     public StudentDashboard() {
-
         int id = SessionManager.getInstance().getLoggedInUserId();
-
-        if (id < 0) {
-            throw new IllegalStateException("Student login is required.");
-        }
+        if (id < 0) throw new IllegalStateException("Student login is required.");
 
         MarksDAO dao = new MarksDAO();
         currentStudent = dao.getStudentDetails(id);
-
         if (currentStudent == null || currentStudent.getStudentId() != id) {
-            throw new IllegalStateException(
-                    "Logged-in student not found in database."
-            );
+            throw new IllegalStateException("Logged-in student not found in database.");
         }
 
         setTitle("FTMS - Student Dashboard");
@@ -54,60 +45,48 @@ public class StudentDashboard extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Initialize panels
         homePanel = new DashboardHomePanel(currentStudent);
         profilePanel = new ProfilePanel(currentStudent);
         coursesPanel = new CoursesPanel();
         attendancePanel = new AttendancePanel();
         eligibilityPanel = new EligibilityPanel();
         gradesAndGpaPanel = new GradesAndGpaPanel();
-
-        // Student medical records (view only)
         medicalSubmissionPanel = new MedicalSubmissionPanel();
         timetablePanel = new StudentTimetablePanel(currentStudent.getDepartment());
         noticesPanel = new StudentNoticesPanel();
 
-        // CardLayout
         CardLayout layout = new CardLayout();
         JPanel content = new JPanel(layout);
-
         content.add(homePanel, "Dashboard");
         content.add(profilePanel, "Profile");
         content.add(coursesPanel, "Courses");
         content.add(attendancePanel, "Attendance");
         content.add(eligibilityPanel, "Eligibility");
         content.add(gradesAndGpaPanel, "Grades");
-
-        // Student medical records page
         content.add(medicalSubmissionPanel, "Medical");
         content.add(timetablePanel, "Timetable");
         content.add(noticesPanel, "Notices");
 
-        // Sidebar
-        add(
-                new SidebarPanel(
-                        layout,
-                        content,
-                        this,
-                        profilePanel,
-                        this::refreshData
-                ),
-                BorderLayout.WEST
-        );
-
+        add(new SidebarPanel(layout, content, this, profilePanel, this::refreshData), BorderLayout.WEST);
         add(content, BorderLayout.CENTER);
-
         refreshData();
     }
 
+    private String eligibilityStatus(Double ca, Double theory, Double practical) {
+        if ((ca != null && ca < 16.0)
+                || (theory != null && theory < 80.0)
+                || (practical != null && practical < 80.0)) {
+            return "NOT ELIGIBLE";
+        }
+        if (ca == null || theory == null || practical == null) return "PENDING";
+        return "ELIGIBLE";
+    }
+
     private void refreshData() {
-
         int id = currentStudent.getStudentId();
-
         MarksDAO dao = new MarksDAO();
         List<Marks> marks = dao.getMarksByStudentId(id);
 
-        // Attendance is checked separately for each course.
         Map<String, AttendanceRecord> attendanceByCourse = new HashMap<>();
         for (AttendanceRecord record : new AttendanceDAO().getMedicalAdjustedAttendanceForStudent(id)) {
             if (record.getCourseCode() != null) {
@@ -120,118 +99,77 @@ public class StudentDashboard extends JFrame {
         homePanel.refreshData();
 
         gradesAndGpaPanel.getLblStudentSummary().setText(
-                "Student ID: " + currentStudent.getTgNum() +
-                        " | Program: " + currentStudent.getDepartment() +
-                        " | Batch: " + currentStudent.getBatch() +
-                        " | Semester: " + currentStudent.getSemester() +
-                        " | Academic Year: " + currentStudent.getYear()
-        );
+                "Student ID: " + currentStudent.getTgNum()
+                        + " | Program: " + currentStudent.getDepartment()
+                        + " | Batch: " + currentStudent.getBatch()
+                        + " | Semester: " + currentStudent.getSemester()
+                        + " | Academic Year: " + currentStudent.getYear());
 
         gradesAndGpaPanel.getMarksTableModel().setRowCount(0);
         eligibilityPanel.getEligibilityTableModel().setRowCount(0);
 
         double total = 0;
-        boolean eligible = !marks.isEmpty();
+        int eligibleCourses = 0;
+        int pendingCourses = 0;
 
         for (Marks m : marks) {
-
             total += m.getTotalMarks();
+            AttendanceRecord attendance = m.getCourseCode() == null ? null
+                    : attendanceByCourse.get(m.getCourseCode().trim().toUpperCase(Locale.ROOT));
 
-            AttendanceRecord attendance = m.getCourseCode() == null ? null :
-                    attendanceByCourse.get(m.getCourseCode().trim().toUpperCase(Locale.ROOT));
-            // Both attendance types must have recorded sessions and reach at least 80%.
-            double theoryPercentage = attendance == null ? 0.0 : attendance.getTheoryPercentage();
-            double practicalPercentage = attendance == null ? 0.0 : attendance.getPracticalPercentage();
-            boolean courseEligible = m.viewMyEligibility()
-                    && attendance != null
-                    && attendance.getTheoryTotal() > 0
-                    && attendance.getPracticalTotal() > 0
-                    && theoryPercentage >= 80.0
-                    && practicalPercentage >= 80.0;
-            eligible &= courseEligible;
+            Double theory = attendance != null && attendance.getTheoryTotal() > 0
+                    ? attendance.getTheoryPercentage() : null;
+            Double practical = attendance != null && attendance.getPracticalTotal() > 0
+                    ? attendance.getPracticalPercentage() : null;
 
-            gradesAndGpaPanel.getMarksTableModel().addRow(
-                    new Object[]{
-                            m.getCourseCode(),
-                            m.getCourseName(),
-                            m.getCaMarks(),
-                            m.getFinalExamMarks(),
-                            m.getTotalMarks(),
-                            m.getGrade()
-                    }
-            );
+            // The existing Marks model exposes primitive doubles. A missing CA mark
+            // may be converted to 0 by the DAO; update DAO/model if NULL must mean PENDING.
+            Double ca = m.getCaMarks();
+            String status = eligibilityStatus(ca, theory, practical);
+            if ("ELIGIBLE".equals(status)) eligibleCourses++;
+            if ("PENDING".equals(status)) pendingCourses++;
 
-            eligibilityPanel.getEligibilityTableModel().addRow(
-                    new Object[]{
-                            m.getCourseCode(),
-                            m.getCourseName(),
-                            m.getCaMarks(),
-                            String.format("%.2f%%", theoryPercentage),
-                            String.format("%.2f%%", practicalPercentage),
-                            "CA >= 40; Theory >= 80%; Practical >= 80%",
-                            courseEligible
-                                    ? "ELIGIBLE"
-                                    : "NOT ELIGIBLE"
-                    }
-            );
+            gradesAndGpaPanel.getMarksTableModel().addRow(new Object[]{
+                    m.getCourseCode(), m.getCourseName(), m.getCaMarks(),
+                    m.getFinalExamMarks(), m.getTotalMarks(), m.getGrade(), status
+            });
+
+            eligibilityPanel.getEligibilityTableModel().addRow(new Object[]{
+                    m.getCourseCode(), m.getCourseName(), m.getCaMarks(),
+                    theory == null ? "--" : String.format(Locale.US, "%.2f%%", theory),
+                    practical == null ? "--" : String.format(Locale.US, "%.2f%%", practical),
+                    "CA >= 16/40; Theory >= 80%; Practical >= 80%", status
+            });
         }
 
-        gradesAndGpaPanel.getLblTotalCourses().setText(
-                "Total Courses: " + marks.size()
-        );
-
+        gradesAndGpaPanel.getLblTotalCourses().setText("Total Courses: " + marks.size());
         gradesAndGpaPanel.getLblTotalMarks().setText(
-                "Total Marks: " +
-                        String.format("%.2f", total) +
-                        " / " + (marks.size() * 100)
-        );
-
-        gradesAndGpaPanel.getLblPercentage().setText(
-                marks.isEmpty()
-                        ? "Percentage: --"
-                        : String.format(
-                        "Percentage: %.2f%%",
-                        total / marks.size()
-                )
-        );
+                "Total Marks: " + String.format(Locale.US, "%.2f", total)
+                        + " / " + (marks.size() * 100));
+        gradesAndGpaPanel.getLblPercentage().setText(marks.isEmpty() ? "Percentage: --"
+                : String.format(Locale.US, "Percentage: %.2f%%", total / marks.size()));
 
         GPA gpa = dao.getGPAByStudentId(id);
+        gradesAndGpaPanel.getLblSgpa().setText(gpa == null ? "--"
+                : String.format(Locale.US, "%.2f", gpa.getSgpa()));
+        gradesAndGpaPanel.getLblCgpa().setText(gpa == null ? "--"
+                : String.format(Locale.US, "%.2f", gpa.getCgpa()));
 
-        gradesAndGpaPanel.getLblSgpa().setText(
-                gpa == null
-                        ? "--"
-                        : String.format("%.2f", gpa.getSgpa())
-        );
-
-        gradesAndGpaPanel.getLblCgpa().setText(
-                gpa == null
-                        ? "--"
-                        : String.format("%.2f", gpa.getCgpa())
-        );
-
-        gradesAndGpaPanel.getLblCaStatus().setText(
-                marks.isEmpty()
-                        ? "No Results"
-                        : eligible
-                        ? "Eligible"
-                        : "Not Eligible"
-        );
-
-        gradesAndGpaPanel.getLblCaStatus().setForeground(
-                marks.isEmpty()
-                        ? Color.GRAY
-                        : eligible
-                        ? new Color(0, 150, 0)
-                        : Color.RED
-        );
+        JLabel summary = gradesAndGpaPanel.getLblCaStatus();
+        if (marks.isEmpty()) {
+            summary.setText("No Results");
+            summary.setForeground(Color.GRAY);
+        } else {
+            summary.setText("Eligible Courses: " + eligibleCourses + " / " + marks.size());
+            summary.setForeground(pendingCourses > 0 ? new Color(146, 64, 14)
+                    : new Color(0, 130, 130));
+        }
 
         profilePanel.updateProfileData();
         medicalSubmissionPanel.refreshRecords();
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(
-                () -> new LoginFrame().setVisible(true)
-        );
+        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
     }
 }
