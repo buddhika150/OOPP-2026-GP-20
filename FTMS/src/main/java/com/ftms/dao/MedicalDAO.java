@@ -4,13 +4,61 @@ import com.ftms.database.DatabaseConnection;
 import com.ftms.model.Medical;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MedicalDAO {
 
-    // 1. Insert new medical record (AUTO_INCREMENT) including medicalimg
+    /**
+     * Resolves the student's absence date.
+     * If linked to an Attendance record, checks attendance session date.
+     * Otherwise defaults to medical start date.
+     */
+    public LocalDate getAbsenceDate(Medical m) {
+        if (m == null) {
+            return null;
+        }
+        if (m.getAttendanceId() != null && m.getAttendanceId() > 0) {
+            String sql = "SELECT Session_date FROM attendance WHERE Attendance_ID = ?";
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, m.getAttendanceId());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        Date d = rs.getDate("Session_date");
+                        if (d != null) {
+                            return d.toLocalDate();
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return m.getStartDate();
+    }
+
+    /**
+     * Strictly verifies whether the medical submission is within 14 days of the absence date.
+     */
+    public boolean isWithin14Days(Medical m) {
+        if (m == null) {
+            return false;
+        }
+        LocalDate absentDate = getAbsenceDate(m);
+        LocalDate subDate = m.getSubmissionDate() != null ? m.getSubmissionDate() : LocalDate.now();
+        return Medical.isWithin14Days(absentDate, subDate);
+    }
+
+    // 1. Insert new medical record (AUTO_INCREMENT) including medicalimg with 14-day rule enforced
     public boolean addMedical(Medical m) {
+        LocalDate absentDate = getAbsenceDate(m);
+        LocalDate subDate = m.getSubmissionDate() != null ? m.getSubmissionDate() : LocalDate.now();
+
+        // Enforce 14-day business rule at the DAO layer
+        Medical.validateSubmissionDeadline(absentDate, subDate);
+
         String sql = "INSERT INTO medical (Student_ID, Attendance_ID, Submission_date, Start_date, End_date, Reason, Approval_status, Status, medicalimg) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -19,7 +67,7 @@ public class MedicalDAO {
 
             ps.setInt(1, m.getStudentId());
             ps.setObject(2, m.getAttendanceId(), Types.INTEGER);
-            ps.setDate(3, m.getSubmissionDate() != null ? Date.valueOf(m.getSubmissionDate()) : null);
+            ps.setDate(3, subDate != null ? Date.valueOf(subDate) : null);
             ps.setDate(4, m.getStartDate() != null ? Date.valueOf(m.getStartDate()) : null);
             ps.setDate(5, m.getEndDate() != null ? Date.valueOf(m.getEndDate()) : null);
             ps.setString(6, m.getReason());
@@ -118,8 +166,14 @@ public class MedicalDAO {
         return list;
     }
 
-    // 6. Update full medical record including medicalimg
+    // 6. Update full medical record including medicalimg with 14-day rule enforced
     public boolean updateMedical(Medical m) {
+        LocalDate absentDate = getAbsenceDate(m);
+        LocalDate subDate = m.getSubmissionDate() != null ? m.getSubmissionDate() : LocalDate.now();
+
+        // Enforce 14-day business rule at the DAO layer
+        Medical.validateSubmissionDeadline(absentDate, subDate);
+
         String sql = "UPDATE medical SET Student_ID = ?, Attendance_ID = ?, Submission_date = ?, " +
                 "Start_date = ?, End_date = ?, Reason = ?, Approval_status = ?, Status = ?, medicalimg = ? " +
                 "WHERE Medical_ID = ?";
@@ -129,7 +183,7 @@ public class MedicalDAO {
 
             ps.setInt(1, m.getStudentId());
             ps.setObject(2, m.getAttendanceId(), Types.INTEGER);
-            ps.setDate(3, m.getSubmissionDate() != null ? Date.valueOf(m.getSubmissionDate()) : null);
+            ps.setDate(3, subDate != null ? Date.valueOf(subDate) : null);
             ps.setDate(4, m.getStartDate() != null ? Date.valueOf(m.getStartDate()) : null);
             ps.setDate(5, m.getEndDate() != null ? Date.valueOf(m.getEndDate()) : null);
             ps.setString(6, m.getReason());

@@ -489,6 +489,15 @@ public class AddMedicalPanel extends JPanel {
         LocalDate endDate = parseDateField(txtEndDate.getText().trim(), "End Date");
 
         String reason = txtReason.getText().trim();
+        LocalDate absentDate = startDate;
+        if (attendanceId != null && attendanceId > 0) {
+            com.ftms.dao.AttendanceDAO attDAO = new com.ftms.dao.AttendanceDAO();
+            com.ftms.model.Attendance att = attDAO.getAttendanceById(attendanceId);
+            if (att != null && att.getSessionDate() != null) {
+                absentDate = att.getSessionDate();
+            }
+        }
+        Medical.validateSubmissionDeadline(absentDate, submissionDate);
         if (reason.isEmpty()) {
             throw new IllegalArgumentException("Reason is required.");
         }
