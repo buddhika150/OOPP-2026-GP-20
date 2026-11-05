@@ -22,6 +22,8 @@ public class LecturerProfile extends JFrame {
     private JTextField emailField;
     private JTextField phoneField;
     private JTextField departmentField;
+    private JTextField nicField;
+
     private JLabel photoLabel;
 
     JPanel main_panel = new JPanel(new BorderLayout());    //slide bar and dear balence main panel
@@ -102,7 +104,7 @@ private void CreateHeading(){
 
 
         // Details Panel
-        JPanel details = new JPanel(new GridLayout(5, 2, 25, 18));
+        JPanel details = new JPanel(new GridLayout(6, 2, 25, 18));
         details.setBackground(Color.WHITE);
 
         Font labelFont = new Font("Arial", Font.BOLD, 20);
@@ -118,6 +120,18 @@ private void CreateHeading(){
         nameField = new JTextField();
         nameField.setFont(fieldFont);
         details.add(nameField);
+
+        //add nic
+        JLabel nicLabel = new JLabel("NIC Number");
+        nicLabel.setFont(labelFont);
+        nicLabel.setForeground(textColor);
+        details.add(nicLabel);
+
+        nicField = new JTextField();
+        nicField.setFont(fieldFont);
+        details.add(nicField);
+
+
 
         // Lecturer ID
         JLabel idLabel = new JLabel("Lecturer ID");
@@ -282,11 +296,21 @@ private void CreateHeading(){
 
     private void updateProfile() {
 
+
+        String nic = nicField.getText().trim().toUpperCase();
+
+        if (!nic.matches("^(\\d{9}[VX]|\\d{12})$")) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter a valid Sri Lankan NIC number"
+            );
+            return;
+        }
+
         try {
             Connection con = DatabaseConnection.getConnection();
 
-            String sql = "UPDATE `user` SET Fname=?, Lname=?, Email=?, Phone=? WHERE User_ID=?";
-
+            String sql = "UPDATE `user` SET Fname=?, Lname=?, Email=?, Phone=?, NIC_Number=? WHERE User_ID=?";
             PreparedStatement pst = con.prepareStatement(sql);
 
             String fullName = nameField.getText().trim();
@@ -299,7 +323,8 @@ private void CreateHeading(){
             pst.setString(2, lastName);
             pst.setString(3, emailField.getText());
             pst.setString(4, phoneField.getText());
-            pst.setInt(5, lectureId);
+            pst.setString(5, nic);
+            pst.setInt(6, lectureId);
 
             int rows = pst.executeUpdate();
 
@@ -351,6 +376,8 @@ private void CreateHeading(){
                     emailField.setText(rs.getString("Email"));
                     phoneField.setText(rs.getString("Phone"));
                     departmentField.setText(rs.getString("Department"));
+
+                    nicField.setText(rs.getString("NIC_Number"));
 
                     String photoPath = rs.getString("Profile_pic");
 
