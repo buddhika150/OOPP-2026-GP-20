@@ -195,6 +195,7 @@ public class CourseManagement extends JFrame {
     }
 
     // ADD / EDIT COURSE
+
     void courseForm(boolean editing) {
 
         int row = table.getSelectedRow();
@@ -208,34 +209,176 @@ public class CourseManagement extends JFrame {
             row = table.convertRowIndexToModel(row);
         }
 
-        JTextField[] fields = new JTextField[8];
+        JTextField codeField = new JTextField(18);
+        JTextField nameField = new JTextField(18);
 
-        JPanel form = new JPanel(new GridLayout(9, 2, 10, 10));
+        codeField.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offset, String str,
+                                     javax.swing.text.AttributeSet attr)
+                    throws javax.swing.text.BadLocationException {
 
-        for (int i = 0; i < 8; i++) {
-
-            fields[i] = new JTextField(18);
-
-            form.add(new JLabel(columns[i] + ":"));
-            form.add(fields[i]);
-
-            if (editing) {
-                fields[i].setText(
-                        String.valueOf(model.getValueAt(row, i)));
+                if (str != null) {
+                    super.insertString(offset, str.toUpperCase(java.util.Locale.ROOT), attr);
+                }
             }
-        }
 
-        if (editing) {
-            fields[0].setEditable(false);
-        }
+            @Override
+            public void replace(int offset, int length, String str,
+                                javax.swing.text.AttributeSet attrs)
+                    throws javax.swing.text.BadLocationException {
+
+                super.replace(offset, length,
+                        str == null ? null : str.toUpperCase(java.util.Locale.ROOT),
+                        attrs);
+            }
+        });
+
+
+
+
+        JComboBox<String> level = new JComboBox<>(
+                new String[]{
+                        "Level 1",
+                        "Level 2",
+                        "Level 3",
+                        "Level 4"
+                });
+
+        JComboBox<String> semester = new JComboBox<>(
+                new String[]{"Semester 1", "Semester 2"});
+
+        JComboBox<String> courseType = new JComboBox<>(
+                new String[]{"Theory", "Practical"});
+
+        JTextField theoryCredits = new JTextField("0");
+        JTextField practicalCredits = new JTextField("0");
+        JTextField theoryHours = new JTextField("0");
+        JTextField practicalHours = new JTextField("0");
+
+        theoryCredits.setEditable(false);
+        practicalCredits.setEditable(false);
+        theoryHours.setEditable(false);
+        practicalHours.setEditable(false);
 
         JComboBox<String> department = new JComboBox<>(
                 new String[]{"ICT", "ET", "BST"});
 
+        // LOAD EXISTING DATA
         if (editing) {
+
+            codeField.setText(String.valueOf(model.getValueAt(row, 0)));
+            nameField.setText(String.valueOf(model.getValueAt(row, 1)));
+
+            int year = Integer.parseInt(
+                    model.getValueAt(row, 2).toString());
+
+            int sem = Integer.parseInt(
+                    model.getValueAt(row, 3).toString());
+
+            int tc = Integer.parseInt(
+                    model.getValueAt(row, 4).toString());
+
+            int pc = Integer.parseInt(
+                    model.getValueAt(row, 5).toString());
+
+            level.setSelectedIndex(year == 2 ? 1 : 0);
+            semester.setSelectedIndex(sem == 2 ? 1 : 0);
+
+            courseType.setSelectedItem(
+                    pc > 0 && tc == 0 ? "Practical" : "Theory");
+
             department.setSelectedItem(
                     String.valueOf(model.getValueAt(row, 8)));
+
+            codeField.setEditable(false);
         }
+
+        // AUTOMATIC CREDIT AND HOURS
+        Runnable calculate = () -> {
+
+            theoryCredits.setText("0");
+            practicalCredits.setText("0");
+            theoryHours.setText("0");
+            practicalHours.setText("0");
+
+            String code = codeField.getText().trim();
+
+            if (code.isEmpty()) return;
+
+            char last = code.charAt(code.length() - 1);
+
+            if (!Character.isDigit(last)) return;
+
+            int credits = Character.getNumericValue(last);
+            int hours = credits * 2;
+
+            String type = (String) courseType.getSelectedItem();
+
+            if ("Theory".equals(type)) {
+                theoryCredits.setText(String.valueOf(credits));
+                theoryHours.setText(String.valueOf(hours));
+            } else {
+                practicalCredits.setText(String.valueOf(credits));
+                practicalHours.setText(String.valueOf(hours));
+            }
+        };
+
+        // WHEN COURSE CODE CHANGES
+        codeField.getDocument().addDocumentListener(
+                new javax.swing.event.DocumentListener() {
+
+                    public void insertUpdate(
+                            javax.swing.event.DocumentEvent e) {
+                        calculate.run();
+                    }
+
+                    public void removeUpdate(
+                            javax.swing.event.DocumentEvent e) {
+                        calculate.run();
+                    }
+
+                    public void changedUpdate(
+                            javax.swing.event.DocumentEvent e) {
+                        calculate.run();
+                    }
+                }
+        );
+
+        // WHEN COURSE TYPE CHANGES
+        courseType.addActionListener(e -> calculate.run());
+
+        calculate.run();
+
+        // FORM
+        JPanel form = new JPanel(new GridLayout(10, 2, 10, 10));
+
+        form.add(new JLabel("Course Code:"));
+        form.add(codeField);
+
+        form.add(new JLabel("Course Name:"));
+        form.add(nameField);
+
+        form.add(new JLabel("Level:"));
+        form.add(level);
+
+        form.add(new JLabel("Semester:"));
+        form.add(semester);
+
+        form.add(new JLabel("Course Type:"));
+        form.add(courseType);
+
+        form.add(new JLabel("Theory Credits:"));
+        form.add(theoryCredits);
+
+        form.add(new JLabel("Practical Credits:"));
+        form.add(practicalCredits);
+
+        form.add(new JLabel("Theory Hours:"));
+        form.add(theoryHours);
+
+        form.add(new JLabel("Practical Hours:"));
+        form.add(practicalHours);
 
         form.add(new JLabel("Department:"));
         form.add(department);
@@ -244,67 +387,80 @@ public class CourseManagement extends JFrame {
                 this,
                 form,
                 editing ? "Edit Course" : "Add Course",
-                JOptionPane.OK_CANCEL_OPTION
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
         );
 
-        if (result != JOptionPane.OK_OPTION) {
-            return;
-        }
+        if (result != JOptionPane.OK_OPTION) return;
 
         try {
 
-            String code = fields[0].getText().trim();
-            String name = fields[1].getText().trim();
+            String code = codeField.getText().trim();
+            String name = nameField.getText().trim();
 
             if (code.isEmpty() || name.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "Course code and name are required");
+                JOptionPane.showMessageDialog(
+                        this, "Course code and name are required");
                 return;
             }
 
-            int year = Integer.parseInt(fields[2].getText().trim());
-            int sem = Integer.parseInt(fields[3].getText().trim());
-            int tc = Integer.parseInt(fields[4].getText().trim());
-            int pc = Integer.parseInt(fields[5].getText().trim());
-            int th = Integer.parseInt(fields[6].getText().trim());
-            int ph = Integer.parseInt(fields[7].getText().trim());
+            char last = code.charAt(code.length() - 1);
 
-            String departmentValue =
-                    (String) department.getSelectedItem();
-
-            if (year < 1 || sem < 1 || sem > 2 ||
-                    tc < 0 || pc < 0 || th < 0 || ph < 0) {
-
-                JOptionPane.showMessageDialog(this,
-                        "Enter valid course details");
+            if (!Character.isDigit(last)) {
+                JOptionPane.showMessageDialog(
+                        this, "Course code must end with a credit number");
                 return;
             }
+
+            int credits = Character.getNumericValue(last);
+
+            if (credits <= 0) {
+                JOptionPane.showMessageDialog(
+                        this, "Credits must be greater than zero");
+                return;
+            }
+
+            int year = level.getSelectedIndex() + 1;
+            int sem = semester.getSelectedIndex() + 1;
+
+            int tc = 0;
+            int pc = 0;
+            int th = 0;
+            int ph = 0;
+
+            String type = (String) courseType.getSelectedItem();
+
+            if ("Theory".equals(type)) {
+                tc = credits;
+                th = credits * 2;
+            } else {
+                pc = credits;
+                ph = credits * 2;
+            }
+
+            String dept = (String) department.getSelectedItem();
 
             if (editing) {
-
-                dao.updateCourse(code, name, year, sem,
-                        tc, pc, th, ph, departmentValue);
-
+                dao.updateCourse(
+                        code, name, year, sem,
+                        tc, pc, th, ph, dept);
             } else {
-
-                dao.addCourse(code, name, year, sem,
-                        tc, pc, th, ph, departmentValue);
+                dao.addCourse(
+                        code, name, year, sem,
+                        tc, pc, th, ph, dept);
             }
 
             loadCourses();
 
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                    this,
                     editing ? "Course updated!" : "Course added!");
 
-        } catch (NumberFormatException e) {
-
-            JOptionPane.showMessageDialog(this, "Enter valid numbers");
-
         } catch (SQLException e) {
-
             error(e);
         }
     }
+
 
     // ASSIGN LECTURER TO COURSE
     void assignLecturer() {
